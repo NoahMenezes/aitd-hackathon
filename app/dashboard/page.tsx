@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useDashboard } from "@/lib/DashboardContext";
 import { useLanguage } from "@/lib/LanguageContext";
+import Link from "next/link";
 import {
   Building2,
   Wallet,
@@ -21,9 +22,11 @@ import {
   Calendar,
   Clock,
   Activity,
+  CheckCircle2,
+  ChevronRight,
+  Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 import { BorderBeam } from "@/components/magicui/border-beam";
 
 export default function DashboardPage() {
@@ -34,6 +37,7 @@ export default function DashboardPage() {
     transactions,
     foodSpend,
     handlePurchase,
+    selectedPlan,
   } = useDashboard();
   const { t } = useLanguage();
   const [isLinking, setIsLinking] = useState(false);
@@ -214,6 +218,56 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Plan Progress Section */}
+        {selectedPlan && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] p-8 border border-white shadow-xl shadow-slate-200/20 relative overflow-hidden">
+              <BorderBeam colorFrom="#000" colorTo="#000" size={200} duration={12} />
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+                
+                {/* Left: Plan Info */}
+                <div className="flex items-center gap-5">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center shrink-0">
+                    <Target size={22} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Active Plan</p>
+                    </div>
+                    <p className="text-lg font-bold text-slate-900 tracking-tight">{selectedPlan.label} Savings Plan</p>
+                    <p className="text-xs text-slate-500 font-medium">
+                      Started {new Date(selectedPlan.startedAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Center: Steps */}
+                <div className="flex flex-col gap-1.5 flex-grow md:max-w-xs">
+                  {selectedPlan.steps.map((step, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <ChevronRight size={12} className="text-slate-400 shrink-0" />
+                      <p className="text-xs font-medium text-slate-600">{step}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Right: Savings Target */}
+                <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Savings Target</p>
+                  <p className="text-3xl font-black text-slate-900 tracking-tight">₹{selectedPlan.yearlySavings.toLocaleString("en-IN")}<span className="text-sm font-semibold text-slate-400">/yr</span></p>
+                  <p className="text-xs font-semibold text-emerald-600">{selectedPlan.feasibility}</p>
+                  <Link href="/dashboard/simulation">
+                    <button className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-900 flex items-center gap-1 transition-colors">
+                      Change plan <ChevronRight size={11} />
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
