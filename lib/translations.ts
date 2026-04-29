@@ -9,7 +9,7 @@ export const translations = {
     },
     hero: {
       badge: "Financial Decision AI Copilot 🚀",
-      headline: "The AI Copilot for Your <span class='italic'>Financial</span> Future",
+      headline: "The AI Copilot for Your Financial Future",
       italicWord: "Financial",
       subheadline: "Stop just tracking expenses. Start predicting impact. FinPilot simulates your daily decisions to guide you toward a wealthier future.",
       cta: "Analyze My Finances",
@@ -44,7 +44,7 @@ export const translations = {
     },
     hero: {
       badge: "वित्तीय निर्णय एआई कोपायलट 🚀",
-      headline: "आपके <span class='italic'>वित्तीय</span> भविष्य के लिए एआई कोपायलट",
+      headline: "आपके वित्तीय भविष्य के लिए एआई कोपायलट",
       italicWord: "वित्तीय",
       subheadline: "केवल खर्चों को ट्रैक करना बंद करें। प्रभाव की भविष्यवाणी करना शुरू करें। FinPilot आपके दैनिक निर्णयों का सिमुलेशन करता है ताकि आपको एक समृद्ध भविष्य की ओर ले जा सके।",
       cta: "मेरे वित्त का विश्लेषण करें",

@@ -11,7 +11,7 @@ export const Features = () => {
   const { t } = useLanguage();
 
   return (
-    <section className="py-24 bg-secondary/10 backdrop-blur-[2px] relative">
+    <section className="py-24 bg-transparent relative">
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
         <div className="text-center mb-16">
           <motion.h2 

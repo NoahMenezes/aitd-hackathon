@@ -14,7 +14,7 @@ export const Timeline = () => {
   });
 
   return (
-    <section className="py-24 relative overflow-hidden bg-background/20 backdrop-blur-[2px]">
+    <section className="py-24 relative overflow-hidden bg-transparent">
       <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
         <div className="text-center mb-20">
           <motion.h2 
