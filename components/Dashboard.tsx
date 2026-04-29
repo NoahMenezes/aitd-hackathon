@@ -183,7 +183,15 @@ export const Dashboard = () => {
   );
 };
 
-const SidebarItem = ({ icon, label, active, badge, hasChevron }: any) => (
+interface SidebarItemProps {
+  icon?: React.ReactNode;
+  label: string;
+  active?: boolean;
+  badge?: string;
+  hasChevron?: boolean;
+}
+
+const SidebarItem = ({ icon, label, active, badge, hasChevron }: SidebarItemProps) => (
   <div className={cn(
     "flex items-center gap-2 px-2 py-1.5 rounded-md text-[11px] transition-colors",
     active ? "bg-white shadow-sm text-foreground" : "text-muted-foreground"
@@ -195,7 +203,12 @@ const SidebarItem = ({ icon, label, active, badge, hasChevron }: any) => (
   </div>
 );
 
-const ActionButton = ({ label, primary }: any) => (
+interface ActionButtonProps {
+  label: string;
+  primary?: boolean;
+}
+
+const ActionButton = ({ label, primary }: ActionButtonProps) => (
   <div className={cn(
     "px-3 py-1.5 rounded-full text-[10px] font-medium",
     primary ? "bg-accent text-white" : "bg-white border border-border/50 shadow-sm"
@@ -204,14 +217,27 @@ const ActionButton = ({ label, primary }: any) => (
   </div>
 );
 
-const AccountRow = ({ label, amount }: any) => (
+interface AccountRowProps {
+  label: string;
+  amount: string;
+}
+
+const AccountRow = ({ label, amount }: AccountRowProps) => (
   <div className="flex items-center justify-between py-3">
     <span className="text-xs text-muted-foreground">{label}</span>
     <span className="text-xs font-medium">{amount}</span>
   </div>
 );
 
-const TransactionRow = ({ date, desc, amount, status, statusColor }: any) => (
+interface TransactionRowProps {
+  date: string;
+  desc: string;
+  amount: string;
+  status: string;
+  statusColor: 'amber' | 'green';
+}
+
+const TransactionRow = ({ date, desc, amount, status, statusColor }: TransactionRowProps) => (
   <tr>
     <td className="py-2 text-muted-foreground">{date}</td>
     <td className="py-2 font-medium">{desc}</td>

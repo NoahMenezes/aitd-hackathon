@@ -1,0 +1,279 @@
+
+<h2 class="sr-only">Financial Decision Copilot - UI Screen Layout showing Dashboard, Insights, Simulation, and Recommendations screens</h2>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.screen-nav { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.nav-btn { padding: 6px 14px; border-radius: 20px; border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-secondary); font-size: 13px; cursor: pointer; transition: all 0.15s; }
+.nav-btn.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); font-weight: 500; }
+.screen { display: none; }
+.screen.active { display: block; }
+
+.metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1rem; }
+.metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+.metric-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.metric-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.metric-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px; }
+.card-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.insight-card { border-left: 3px solid; border-radius: var(--border-radius-md); padding: 12px 14px; margin-bottom: 8px; }
+.insight-card.warn { border-left-color: #EF9F27; background: #FAEEDA; color: #633806; }
+.insight-card.info { border-left-color: #378ADD; background: #E6F1FB; color: #042C53; }
+.insight-card.good { border-left-color: #639922; background: #EAF3DE; color: #173404; }
+.insight-title { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+.insight-body { font-size: 12px; opacity: 0.8; }
+
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.bar-label { font-size: 12px; color: var(--color-text-secondary); width: 80px; flex-shrink: 0; }
+.bar-track { flex: 1; height: 8px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; }
+.bar-amount { font-size: 12px; color: var(--color-text-primary); font-weight: 500; width: 60px; text-align: right; flex-shrink: 0; }
+
+.sim-control { margin-bottom: 1.2rem; }
+.sim-label-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.sim-label { font-size: 13px; color: var(--color-text-primary); font-weight: 500; }
+.sim-pct { font-size: 13px; color: var(--color-text-info); font-weight: 500; }
+.result-box { border-radius: var(--border-radius-md); padding: 12px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 0.5px solid var(--color-border-tertiary); background: var(--color-background-secondary); }
+.result-label { font-size: 13px; color: var(--color-text-secondary); }
+.result-val { font-size: 18px; font-weight: 500; color: var(--color-text-success); }
+
+.plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+.plan-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 12px; text-align: center; cursor: pointer; }
+.plan-card.highlight { border: 2px solid var(--color-border-info); }
+.plan-tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 10px; margin-bottom: 6px; display: inline-block; }
+.plan-tag.easy { background: #EAF3DE; color: #3B6D11; }
+.plan-tag.medium { background: #E6F1FB; color: #185FA5; }
+.plan-tag.best { background: #E6F1FB; color: #185FA5; }
+.plan-tag.hard { background: #FAEEDA; color: #854F0B; }
+.plan-saving { font-size: 16px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+.plan-change { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px; }
+.prob-bar { height: 4px; border-radius: 2px; background: var(--color-background-secondary); overflow: hidden; }
+.prob-fill { height: 100%; border-radius: 2px; }
+
+.rec-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.rec-item:last-child { border-bottom: none; }
+.rec-rank { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; margin-top: 2px; }
+.rec-rank.r1 { background: #FAEEDA; color: #633806; }
+.rec-rank.r2 { background: #E6F1FB; color: #042C53; }
+.rec-rank.r3 { background: #EAF3DE; color: #173404; }
+.rec-body { flex: 1; }
+.rec-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 2px; }
+.rec-desc { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.rec-impact { font-size: 12px; color: var(--color-text-success); font-weight: 500; }
+.why-btn { font-size: 11px; color: var(--color-text-info); border: 0.5px solid var(--color-border-info); background: none; border-radius: 20px; padding: 3px 10px; cursor: pointer; margin-top: 4px; }
+
+.no-change-box { background: #FCEBEB; border: 0.5px solid #F09595; border-radius: var(--border-radius-md); padding: 12px 14px; margin-top: 10px; }
+.no-change-box p:first-child { font-size: 13px; font-weight: 500; color: #501313; margin-bottom: 3px; }
+.no-change-box p:last-child { font-size: 12px; color: #791F1F; }
+
+.divider { height: 0.5px; background: var(--color-border-tertiary); margin: 1rem 0; }
+</style>
+
+<div style="padding: 0.5rem 0 1.5rem;">
+
+<div class="screen-nav">
+  <button class="nav-btn active" onclick="showScreen('home')">Dashboard</button>
+  <button class="nav-btn" onclick="showScreen('insights')">Spending insights</button>
+  <button class="nav-btn" onclick="showScreen('simulate')">Simulation</button>
+  <button class="nav-btn" onclick="showScreen('recs')">Recommendations</button>
+</div>
+
+<div id="home" class="screen active">
+  <p style="font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 10px;">April 2026</p>
+
+  <div class="metric-row">
+    <div class="metric">
+      <div class="metric-label">Total spent</div>
+      <div class="metric-value">₹21,400</div>
+      <div class="metric-sub">this month</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">You could save</div>
+      <div class="metric-value" style="color: var(--color-text-success);">₹5,200</div>
+      <div class="metric-sub">per month</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Savings rate</div>
+      <div class="metric-value">12%</div>
+      <div class="metric-sub">avg is 20%</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 4px;">You are spending a lot on food</div>
+    <div style="font-size: 13px; color: var(--color-text-secondary); margin-bottom: 12px;">Food takes up 35% of your monthly spend — higher than usual.</div>
+    <button class="nav-btn active" style="font-size: 13px;" onclick="showScreen('simulate')">See how to improve →</button>
+  </div>
+
+  <div class="no-change-box">
+    <p>If you don't change anything...</p>
+    <p>You'll spend ₹2,56,800 on food alone this year.</p>
+  </div>
+</div>
+
+<div id="insights" class="screen">
+  <div class="card">
+    <div class="card-title">Where your money goes</div>
+    <div class="bar-row">
+      <span class="bar-label">Food</span>
+      <div class="bar-track"><div class="bar-fill" style="width:72%; background:#EF9F27;"></div></div>
+      <span class="bar-amount">₹7,500</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">Shopping</span>
+      <div class="bar-track"><div class="bar-fill" style="width:48%; background:#378ADD;"></div></div>
+      <span class="bar-amount">₹4,900</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">Transport</span>
+      <div class="bar-track"><div class="bar-fill" style="width:28%; background:#1D9E75;"></div></div>
+      <span class="bar-amount">₹2,800</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">Subscriptions</span>
+      <div class="bar-track"><div class="bar-fill" style="width:20%; background:#D4537E;"></div></div>
+      <span class="bar-amount">₹2,100</span>
+    </div>
+    <div class="bar-row">
+      <span class="bar-label">Others</span>
+      <div class="bar-track"><div class="bar-fill" style="width:14%; background:#888780;"></div></div>
+      <span class="bar-amount">₹1,400</span>
+    </div>
+  </div>
+
+  <div class="card-title" style="margin-top:4px;">What we noticed</div>
+  <div class="insight-card warn">
+    <div class="insight-title">Weekend food spike</div>
+    <div class="insight-body">You spend 2x more on food on weekends vs weekdays</div>
+  </div>
+  <div class="insight-card warn">
+    <div class="insight-title">Subscriptions you may not use</div>
+    <div class="insight-body">3 recurring charges detected with low usage patterns</div>
+  </div>
+  <div class="insight-card info">
+    <div class="insight-title">Shopping is rising</div>
+    <div class="insight-body">Up 18% compared to last month</div>
+  </div>
+  <div class="insight-card good">
+    <div class="insight-title">Transport is in control</div>
+    <div class="insight-body">Steady spend — no action needed here</div>
+  </div>
+</div>
+
+<div id="simulate" class="screen">
+  <div class="card">
+    <div class="card-title">What if you reduce food spending?</div>
+
+    <div class="sim-control">
+      <div class="sim-label-row">
+        <span class="sim-label">Reduce food by</span>
+        <span class="sim-pct" id="pct-out">20%</span>
+      </div>
+      <input type="range" min="5" max="50" value="20" step="5" id="food-slider" style="width:100%;" oninput="updateSim(this.value)">
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--color-text-tertiary); margin-top:4px;"><span>5%</span><span>50%</span></div>
+    </div>
+
+    <div class="result-box">
+      <span class="result-label">Monthly saving</span>
+      <span class="result-val" id="monthly-save">₹1,500</span>
+    </div>
+    <div class="result-box">
+      <span class="result-label">Yearly saving</span>
+      <span class="result-val" id="yearly-save">₹18,000</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="card-title">Compare plans</div>
+    <div class="plan-grid">
+      <div class="plan-card">
+        <span class="plan-tag easy">Easy</span>
+        <div class="plan-saving">₹9k/yr</div>
+        <div class="plan-change">10% cut</div>
+        <div class="prob-bar"><div class="prob-fill" style="width:90%; background:#639922;"></div></div>
+        <div style="font-size:10px; color:var(--color-text-tertiary); margin-top:3px;">90% likely</div>
+      </div>
+      <div class="plan-card highlight">
+        <span class="plan-tag best">Best fit</span>
+        <div class="plan-saving">₹18k/yr</div>
+        <div class="plan-change">20% cut</div>
+        <div class="prob-bar"><div class="prob-fill" style="width:65%; background:#378ADD;"></div></div>
+        <div style="font-size:10px; color:var(--color-text-info); margin-top:3px;">65% likely</div>
+      </div>
+      <div class="plan-card">
+        <span class="plan-tag hard">Hard</span>
+        <div class="plan-saving">₹27k/yr</div>
+        <div class="plan-change">30% cut</div>
+        <div class="prob-bar"><div class="prob-fill" style="width:25%; background:#EF9F27;"></div></div>
+        <div style="font-size:10px; color:var(--color-text-tertiary); margin-top:3px;">25% likely</div>
+      </div>
+    </div>
+    <div style="font-size:12px; color:var(--color-text-secondary); background:var(--color-background-secondary); border-radius:var(--border-radius-md); padding:10px 12px;">
+      Based on your past behavior, you usually follow moderate changes. The <strong>20% plan</strong> balances savings and consistency.
+    </div>
+  </div>
+</div>
+
+<div id="recs" class="screen">
+  <p style="font-size:13px; color:var(--color-text-secondary); margin-bottom:12px;">Ranked by impact on your finances</p>
+  <div class="card">
+    <div class="rec-item">
+      <div class="rec-rank r1">1</div>
+      <div class="rec-body">
+        <div class="rec-title">Reduce food ordering</div>
+        <div class="rec-desc">Cut 2 Swiggy/Zomato orders per week</div>
+        <div class="rec-impact">Saves ₹18,000/year</div>
+        <button class="why-btn" onclick="sendPrompt('Why is reducing food the top recommendation for my financial profile?')">Why this? ↗</button>
+      </div>
+    </div>
+    <div class="rec-item">
+      <div class="rec-rank r2">2</div>
+      <div class="rec-body">
+        <div class="rec-title">Cancel unused subscriptions</div>
+        <div class="rec-desc">3 recurring charges with low usage detected</div>
+        <div class="rec-impact">Saves ₹7,200/year</div>
+        <button class="why-btn" onclick="sendPrompt('Which subscriptions should I cancel and how was this detected?')">Why this? ↗</button>
+      </div>
+    </div>
+    <div class="rec-item">
+      <div class="rec-rank r3">3</div>
+      <div class="rec-body">
+        <div class="rec-title">Set a weekend shopping limit</div>
+        <div class="rec-desc">Your shopping spikes on weekends — a small cap helps</div>
+        <div class="rec-impact">Saves ₹4,800/year</div>
+        <button class="why-btn" onclick="sendPrompt('How did you detect my weekend shopping pattern and what limit do you suggest?')">Why this? ↗</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Your total potential</div>
+    <div style="font-size:28px; font-weight:500; color:var(--color-text-success); margin-bottom:4px;">₹30,000/year</div>
+    <div style="font-size:13px; color:var(--color-text-secondary);">If you follow all 3 recommendations</div>
+    <div class="divider"></div>
+    <button class="nav-btn active" onclick="sendPrompt('Start the balanced savings plan for me and track my progress')">Start saving plan →</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const labels = { home: 'Dashboard', insights: 'Spending insights', simulate: 'Simulation', recs: 'Recommendations' };
+  document.querySelectorAll('.nav-btn').forEach(b => { if (b.textContent === labels[id]) b.classList.add('active'); });
+}
+
+function updateSim(val) {
+  const base = 7500;
+  const monthly = Math.round(base * val / 100 / 100) * 100;
+  const yearly = monthly * 12;
+  document.getElementById('pct-out').textContent = val + '%';
+  document.getElementById('monthly-save').textContent = '₹' + monthly.toLocaleString('en-IN');
+  document.getElementById('yearly-save').textContent = '₹' + yearly.toLocaleString('en-IN');
+}
+</script>
