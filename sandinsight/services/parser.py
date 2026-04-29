@@ -1,8 +1,17 @@
 """
 SandInsight - ReBIT JSON Parser Service
 
-Parses Account Aggregator FI data (ReBIT v2.0 format)
+Parses Account Aggregator FI data (RBI/ReBIT v2.0 format)
 into clean, normalized transaction records.
+
+Schema reference (lowercase RBI keys):
+  root -> fipID, consentId, account
+  account -> type, maskedAccNo, summary, transactions
+  summary -> currentBalance, currency, exchgeRate, openingDate
+  transactions -> startDate, endDate, transaction[]
+  transaction -> type, mode, amount, currentBalance,
+                 transactionTimestamp, valueDate, txnId,
+                 narration, reference
 """
 
 import logging
@@ -13,34 +22,29 @@ logger = logging.getLogger("sandinsight.parser")
 
 def parse_rebit_data(raw_data: dict[str, Any]) -> dict[str, Any]:
     """
-    Parse raw ReBIT-format bank data into a structured summary.
+    Parse raw RBI/ReBIT-format bank data into a structured summary.
 
     Args:
-        raw_data: Raw JSON from mock_bank.json (ReBIT v2.0 format)
+        raw_data: Raw JSON from mock_bank.json (RBI schema, lowercase keys)
 
     Returns:
         Dictionary with account_info and transactions list.
     """
-    account = raw_data.get("Account", {})
-    summary = account.get("Summary", {})
-    profile = account.get("Profile", {})
-    holders = profile.get("Holders", {}).get("Holder", [])
-
-    holder_name = holders[0].get("name", "Unknown") if holders else "Unknown"
+    account = raw_data.get("account", {})
+    summary = account.get("summary", {})
 
     account_info = {
-        "holder_name": holder_name,
-        "masked_account": account.get("maskedAccNumber", "N/A"),
-        "account_type": account.get("type", "N/A"),
+        "masked_account":  account.get("maskedAccNo", "N/A"),
+        "account_type":    account.get("type", "N/A"),
         "current_balance": _safe_float(summary.get("currentBalance", "0")),
-        "currency": summary.get("currency", "INR"),
-        "branch": summary.get("branch", "N/A"),
-        "ifsc": summary.get("ifscCode", "N/A"),
-        "status": summary.get("status", "N/A"),
+        "currency":        summary.get("currency", "INR"),
+        "opening_date":    summary.get("openingDate", "N/A"),
+        "fip_id":          raw_data.get("fipID", "N/A"),
+        "consent_id":      raw_data.get("consentId", "N/A"),
     }
 
     raw_transactions = (
-        account.get("Transactions", {}).get("Transaction", [])
+        account.get("transactions", {}).get("transaction", [])
     )
 
     transactions = [_parse_transaction(txn) for txn in raw_transactions]
@@ -60,15 +64,15 @@ def parse_rebit_data(raw_data: dict[str, Any]) -> dict[str, Any]:
 def _parse_transaction(txn: dict[str, Any]) -> dict[str, Any]:
     """Extract and normalize a single transaction record."""
     return {
-        "txn_id": txn.get("txnId", ""),
-        "type": txn.get("type", "UNKNOWN"),
-        "mode": txn.get("mode", "UNKNOWN"),
-        "amount": _safe_float(txn.get("amount", "0")),
-        "balance_after": _safe_float(txn.get("currentBalance", "0")),
-        "timestamp": txn.get("transactionTimestamp", ""),
-        "date": txn.get("valueDate", ""),
-        "narration": txn.get("narration", ""),
-        "reference": txn.get("reference", ""),
+        "txn_id":       txn.get("txnId", ""),
+        "type":         txn.get("type", "UNKNOWN"),
+        "mode":         txn.get("mode", "UNKNOWN"),
+        "amount":       _safe_float(txn.get("amount", "0")),
+        "balance_after":_safe_float(txn.get("currentBalance", "0")),
+        "timestamp":    txn.get("transactionTimestamp", ""),
+        "date":         txn.get("valueDate", ""),
+        "narration":    txn.get("narration", ""),
+        "reference":    txn.get("reference", ""),
     }
 
 
