@@ -1,25 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 @import "tailwindcss";
 
 @plugin "tailwindcss-animate";
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 210 14% 17%;
-  --primary: 210 14% 17%;
+  --background: 0 0% 97%;
+  --foreground: 0 0% 7%;
+  --primary: 0 0% 7%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 96%;
-  --secondary-foreground: 0 0% 9%;
+  --secondary: 0 0% 90%;
+  --secondary-foreground: 0 0% 7%;
   --muted: 0 0% 96%;
-  --muted-foreground: 184 5% 55%;
-  --accent: 239 84% 67%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 0 0% 7%;
   --accent-foreground: 0 0% 100%;
   --border: 0 0% 90%;
-  --ring: 239 84% 67%;
-  --radius: 0.5rem;
-  --font-display: 'Instrument Serif', serif;
+  --ring: 0 0% 7%;
+  --radius: 0px;
   --font-body: 'Inter', sans-serif;
-  --shadow-dashboard: 0 25px 80px -12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
 @theme {
@@ -36,14 +34,19 @@
   --color-border: hsl(var(--border));
   --color-ring: hsl(var(--ring));
 
-  --font-display: var(--font-display);
   --font-body: var(--font-body);
 
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-lg: 0px;
+  --radius-md: 0px;
+  --radius-sm: 0px;
 
-  --shadow-dashboard: var(--shadow-dashboard);
+  --animate-border-beam: border-beam 4s linear infinite;
+
+  @keyframes border-beam {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
 }
 
 @layer base {
@@ -52,8 +55,40 @@
   }
   * {
     @apply border-border;
+    border-radius: 0 !important;
   }
   body {
-    @apply text-foreground font-body;
+    @apply bg-background text-foreground font-body antialiased;
+    line-height: 1.6;
+  }
+}
+
+@layer components {
+  .premium-card {
+    @apply bg-white border border-border shadow-[0_2px_10px_rgba(0,0,0,0.02)] transition-all duration-300;
+  }
+  .premium-card:hover {
+    @apply shadow-[0_8px_30px_rgba(0,0,0,0.04)] border-slate-400 scale-[1.01];
+  }
+  
+  /* Border beam effect simulation */
+  .border-beam {
+    position: relative;
+    overflow: hidden;
+  }
+  .border-beam::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+    animation: beam 3s infinite linear;
+  }
+  
+  @keyframes beam {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(100%); }
   }
 }

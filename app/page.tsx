@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { Navbar } from "@/components/Navbar";
 import { Hero } from "@/components/Hero";
@@ -17,7 +17,7 @@ export default function Home() {
       <Timeline />
       <FAQsTwo />
       <footer className="py-12 border-t border-border text-center text-sm text-muted-foreground bg-background/80 backdrop-blur-sm">
-        © 2026 FinPilot AI. All rights reserved.
+        {t.common.copyright}
       </footer>
     </main>
   );
