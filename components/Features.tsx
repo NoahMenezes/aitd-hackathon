@@ -34,7 +34,7 @@ export const Features = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {t.features.cards.map((card: any, index: number) => {
+          {t.features.cards.map((card: { title: string; description: string }, index: number) => {
             const Icon = icons[index % icons.length];
             return (
               <motion.div

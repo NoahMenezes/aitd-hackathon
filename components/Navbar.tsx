@@ -21,6 +21,7 @@ export const Navbar = () => {
         <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.navbar.pricing}</a>
         <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.navbar.about}</a>
         <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{t.navbar.contact}</a>
+        <a href="/dashboard" className="text-sm font-medium text-foreground hover:opacity-80 transition-opacity">Dashboard</a>
       </div>
 
       <div className="flex items-center gap-4">

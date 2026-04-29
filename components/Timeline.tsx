@@ -45,7 +45,7 @@ export const Timeline = () => {
           />
 
           <div className="space-y-24">
-            {t.timeline.steps.map((step: any, index: number) => (
+            {t.timeline.steps.map((step: { title: string; description: string }, index: number) => (
               <div key={index} className={`flex items-center justify-between w-full ${index % 2 === 0 ? 'flex-row-reverse' : ''}`}>
                 <div className="w-5/12" />
                 <div className="z-20">
