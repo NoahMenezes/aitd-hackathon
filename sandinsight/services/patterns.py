@@ -8,24 +8,29 @@ All patterns derived from real Indian fintech narration formats.
 from __future__ import annotations
 
 # ── Category constants ────────────────────────────────────────────────────────
-FOOD         = "Food & Dining"
-GROCERIES    = "Groceries"
-SHOPPING     = "Shopping"
-TRANSPORT    = "Transport"
-INCOME       = "Income"
+FOOD          = "Food & Dining"
+GROCERIES     = "Groceries"
+SHOPPING      = "Shopping"
+TRANSPORT     = "Transport"
+INCOME        = "Income"
+SALARY_INC    = "Salary"
+FREELANCE_INC = "Freelance Income"
+BUSINESS_INC  = "Business Income"
 HEALTHCARE   = "Healthcare"
-ENTERTAINMENT= "Entertainment"
+ENTERTAINMENT = "Entertainment"
 UTILITIES    = "Rent & Utilities"
 INVESTMENT   = "Investments"
-CASH         = "Cash Withdrawal"
-REFUND       = "Refund / Cashback"
-TRANSFER     = "Transfer"
-UNKNOWN      = "Unknown"
+CASH          = "Cash Withdrawal"
+REFUND        = "Refund / Cashback"
+TRANSFER      = "Transfer"
+SUPPLIER      = "Supplier Payment"
+UNKNOWN       = "Unknown"
 
 ALL_CATEGORIES = [
-    FOOD, GROCERIES, SHOPPING, TRANSPORT, INCOME,
+    FOOD, GROCERIES, SHOPPING, TRANSPORT,
+    SALARY_INC, FREELANCE_INC, BUSINESS_INC, INCOME,
     HEALTHCARE, ENTERTAINMENT, UTILITIES, INVESTMENT,
-    CASH, REFUND, TRANSFER, UNKNOWN,
+    CASH, REFUND, TRANSFER, SUPPLIER, UNKNOWN,
 ]
 
 # ── UPI VPA → Category  (highest confidence: 0.97) ───────────────────────────
@@ -217,29 +222,51 @@ MERCHANT_KEYWORDS: list[tuple[str, str]] = [
     ("REWARD",       REFUND),
 ]
 
-# ── ATM / Cash patterns  (confidence: 0.98) ───────────────────────────────────
+# ── ATM / Cash patterns  (confidence: 0.98) ─────────────────────────────────
 ATM_SIGNALS = ["ATM", "CASH WDL", "WITHDRAWAL", "ATM WDL"]
 
-# ── Salary detection heuristics ───────────────────────────────────────────────
-SALARY_SIGNALS   = ["SALARY", "SAL/", "NEFT CR", "NEFT/SALARY", "BONUS", "STIPEND", "REIMBURSEMENT"]
-SALARY_MIN_AMOUNT = 5_000   # credits below this are unlikely to be salary
+# ── Salary detection ─────────────────────────────────────────────────────────
+SALARY_SIGNALS    = ["SALARY", "SAL/", "NEFT CR", "NEFT/SALARY", "BONUS", "STIPEND", "REIMBURSEMENT"]
+SALARY_MIN_AMOUNT = 10_000   # credits below this are unlikely to be salary
+
+# ── Freelance income signals ──────────────────────────────────────────────────
+# Medium irregular credits, often NEFT/IMPS with client/project refs
+FREELANCE_SIGNALS = [
+    "FREELANCE", "PROJECT", "CONSULTING", "CONTRACT", "INVOICE",
+    "CLIENT", "PAYMENT RECEIVED", "UPWORK", "FIVERR", "TOPTAL",
+    "CONSULTANCY", "MILESTONE", "DELIVERABLE",
+]
+FREELANCE_AMOUNT_BAND = (2_000, 150_000)   # wide band — varies per project
+
+# ── Business / shopkeeper income signals ─────────────────────────────────────
+# High-frequency small UPI credits, often customer IDs or PhonePe/GPay
+BUSINESS_INCOME_SIGNALS = [
+    "PHONEPAY", "GPAY", "PAYTM", "CUSTOMER", "SALE", "SHOP",
+    "RETAIL", "BILLING", "RECEIPT", "PAYMENT FROM",
+]
+BUSINESS_INCOME_MAX = 2_000   # small per-transaction cap for shopkeeper sales
+
+# ── Supplier / inventory payment signals ─────────────────────────────────────
+SUPPLIER_SIGNALS = [
+    "SUPPLIER", "INVENTORY", "WHOLESALE", "VENDOR", "STOCK",
+    "PURCHASE ORDER", "RAW MATERIAL", "DISTRIBUTOR",
+]
 
 # ── Refund signals ────────────────────────────────────────────────────────────
 REFUND_SIGNALS   = ["REFUND", "CASHBACK", "REVERSAL", "PRIZE", "REFERRAL BONUS", "REWARD", "CR-"]
 
 # ── Time-slot → category hint  (low confidence backup) ───────────────────────
-# (hour_start, hour_end): (category, hint_confidence)
 TIME_SLOT_HINTS: list[tuple[int, int, str, float]] = [
-    (6,  9,  TRANSPORT, 0.30),   # morning commute
-    (7,  10, FOOD,      0.25),   # breakfast
-    (12, 14, FOOD,      0.30),   # lunch
-    (17, 20, TRANSPORT, 0.25),   # evening commute
-    (19, 23, FOOD,      0.30),   # dinner
+    (6,  9,  TRANSPORT, 0.30),
+    (7,  10, FOOD,      0.25),
+    (12, 14, FOOD,      0.30),
+    (17, 20, TRANSPORT, 0.25),
+    (19, 23, FOOD,      0.30),
     (20, 23, ENTERTAINMENT, 0.20),
-    (23, 24, FOOD,      0.20),   # late night food
+    (23, 24, FOOD,      0.20),
 ]
 
-# ── Amount brackets for inference ────────────────────────────────────────────
-LARGE_CREDIT_MIN  = 10_000   # likely salary or bonus
+# ── Amount brackets ───────────────────────────────────────────────────────────
+LARGE_CREDIT_MIN  = 10_000
 RENT_TYPICAL_BAND = (5_000, 50_000)
 ATM_TYPICAL_BAND  = (500, 10_000)

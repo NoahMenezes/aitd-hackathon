@@ -112,7 +112,13 @@ def _layer3_narration_scan(narration: str) -> tuple[str, float, str] | None:
 
 
 def _layer4_mode_amount(txn: dict) -> tuple[str, float, str] | None:
-    """L4: Mode, type, and amount heuristics."""
+    """L4: Mode, type, and amount heuristics — extended income classification."""
+    from services.patterns import (
+        SALARY_INC, FREELANCE_INC, BUSINESS_INC, SUPPLIER,
+        FREELANCE_SIGNALS, BUSINESS_INCOME_SIGNALS, BUSINESS_INCOME_MAX,
+        SUPPLIER_SIGNALS, FREELANCE_AMOUNT_BAND,
+    )
+
     mode   = _upper(txn.get("mode", ""))
     ttype  = _upper(txn.get("type", ""))
     narr   = _upper(txn.get("narration", ""))
@@ -122,22 +128,36 @@ def _layer4_mode_amount(txn: dict) -> tuple[str, float, str] | None:
     if mode == "ATM" or _contains_any(narr, ATM_SIGNALS):
         return CASH, 0.98, "atm_mode"
 
-    # Salary / large credits
     if ttype == "CREDIT":
+        # Salary: large NEFT credit with salary keyword
         if _contains_any(narr, SALARY_SIGNALS) and amount >= SALARY_MIN_AMOUNT:
-            return INCOME, 0.96, "salary_signal"
+            return SALARY_INC, 0.96, "salary_signal"
+
+        # Business income: small-value UPI credit, customer/phonepay pattern
+        if amount <= BUSINESS_INCOME_MAX and _contains_any(narr, BUSINESS_INCOME_SIGNALS):
+            return BUSINESS_INC, 0.88, "business_income"
+
+        # Freelance income: medium credit with project/client keyword
+        if (FREELANCE_AMOUNT_BAND[0] <= amount <= FREELANCE_AMOUNT_BAND[1]
+                and _contains_any(narr, FREELANCE_SIGNALS)):
+            return FREELANCE_INC, 0.90, "freelance_income"
+
+        # Large generic NEFT credit → likely salary/business
         if amount >= LARGE_CREDIT_MIN and "NEFT" in narr:
-            return INCOME, 0.85, "large_neft_credit"
+            return SALARY_INC, 0.80, "large_neft_credit"
 
-    # Refunds / cashback
-    if ttype == "CREDIT" and _contains_any(narr, REFUND_SIGNALS):
-        return REFUND, 0.90, "refund_signal"
+        # Refunds / cashback
+        if _contains_any(narr, REFUND_SIGNALS):
+            return REFUND, 0.90, "refund_signal"
 
-    # NEFT transfers (non-salary)
-    if "NEFT" in narr and ttype == "DEBIT":
-        # Rent band
+    # Supplier / inventory debit
+    if ttype == "DEBIT" and _contains_any(narr, SUPPLIER_SIGNALS):
+        return SUPPLIER, 0.88, "supplier_payment"
+
+    # NEFT transfers (non-salary debit)
+    if ttype == "DEBIT" and "NEFT" in narr:
         if RENT_TYPICAL_BAND[0] <= amount <= RENT_TYPICAL_BAND[1]:
-            if "RENT" in narr or "LANDLORD" in narr or "FLAT" in narr:
+            if any(k in narr for k in ("RENT", "LANDLORD", "FLAT")):
                 return UTILITIES, 0.92, "rent_neft"
         return TRANSFER, 0.60, "neft_transfer"
 
