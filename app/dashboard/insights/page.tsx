@@ -5,9 +5,6 @@ import { useDashboard } from "@/lib/DashboardContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import {
   Zap,
-  AlertCircle,
-  Info,
-  CheckCircle2,
   TrendingUp,
   ShoppingBag,
   Truck,
@@ -16,6 +13,7 @@ import {
   ChevronDown,
   Clock,
   Building2,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -58,113 +56,109 @@ export default function InsightsPage() {
     {
       title: "Late Night Impulse",
       body: "35% of your food spend occurs after 10 PM. Consider earlier meal planning.",
-      type: "warn",
       icon: <Clock className="w-5 h-5" />,
     },
     {
       title: "Weekend Spend Surge",
       body: "Spending increases by 140% on Saturdays compared to your weekday average.",
-      type: "warn",
       icon: <TrendingUp className="w-5 h-5" />,
     },
     {
       title: "Merchant Loyalty",
       body: "You spend 60% of your shopping budget at just 2 recurring merchants.",
-      type: "info",
       icon: <Building2 className="w-5 h-5" />,
     },
     {
       title: "Subscription Efficiency",
       body: "You have 4 active subscriptions with consistent, healthy usage patterns.",
-      type: "good",
       icon: <CheckCircle2 className="w-5 h-5" />,
     },
   ];
 
   return (
-    <main className="min-h-screen flex flex-col pt-32 px-6 pb-20 overflow-x-hidden font-sans">
-      <div className="max-w-[1400px] mx-auto w-full space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
-        <header className="flex flex-col gap-3">
-          <div className="inline-flex items-center gap-2 px-4 py-2 border border-black bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] w-fit shadow-sm">
-            <Zap size={12} className="fill-white" />
+    <main className="h-screen flex flex-col pt-8 px-6 pb-10 overflow-hidden font-body bg-transparent">
+      <div className="max-w-[1400px] mx-auto w-full flex flex-col h-full space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+        
+        {/* Header matched to Homepage Hero style */}
+        <header className="flex flex-col gap-3 shrink-0">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 backdrop-blur-sm px-4 py-1.5 text-xs text-muted-foreground font-medium w-fit">
+            <Zap size={12} className="text-foreground" />
             {t.dashboard.insights.engine}
           </div>
-          <h1 className="text-5xl md:text-6xl font-black text-slate-900 tracking-tighter">
+          <h1 className="text-5xl md:text-6xl font-semibold tracking-tight text-foreground">
             {t.dashboard.insights.title}
           </h1>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-grow min-h-0">
           {/* Main Chart Card */}
-          <div className="lg:col-span-8">
-            <div className="bg-white p-10 border border-black shadow-sm relative overflow-hidden">
-              <BorderBeam colorFrom="#000" colorTo="#000" size={300} />
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 pb-12 border-b border-slate-50 relative z-10">
+          <div className="lg:col-span-8 flex flex-col h-full min-h-0">
+            <div className="bg-white/80 backdrop-blur-md p-8 border border-border shadow-sm relative overflow-hidden flex flex-col h-full min-h-0">
+              <BorderBeam colorFrom="#000" colorTo="#000" size={300} duration={6} />
+              
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-8 border-b border-border/50 relative z-10 shrink-0">
                 <div>
-                  <h3 className="text-[11px] font-black text-slate-400 tracking-[0.3em] uppercase mb-4">
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
                     Your Spendings
                   </h3>
                   <div className="relative inline-block group">
                     <select
                       value={timeframe}
                       onChange={(e) => setTimeframe(e.target.value as Timeframe)}
-                      className="appearance-none bg-black text-white font-black text-sm uppercase tracking-[0.2em] px-8 py-4 pr-14 hover:bg-slate-900 transition-all cursor-pointer focus:outline-none border-none shadow-xl"
+                      className="appearance-none bg-foreground text-background font-semibold text-sm px-6 py-3 pr-12 rounded-full hover:opacity-90 transition-all cursor-pointer focus:outline-none border-none shadow-md"
                     >
                       <option value="yearly">Yearly View</option>
                       <option value="monthly">Monthly View</option>
                       <option value="weekly">Weekly View</option>
                     </select>
-                    <ChevronDown size={16} className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-white transition-colors" />
+                    <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-background transition-colors" />
                   </div>
                 </div>
 
                 <div className="text-left md:text-right">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                     Total Spending
                   </p>
-                  <h2 className="text-6xl font-black text-black tracking-tighter">
+                  <h2 className="text-5xl font-semibold text-foreground tracking-tighter">
                     ₹{timeframeData.reduce((acc, cat) => acc + cat.amount, 0).toLocaleString("en-IN")}
                   </h2>
                 </div>
               </div>
 
-              <div className="space-y-2 relative z-10 h-[250px] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-black scrollbar-track-slate-50 mt-4">
+              <div className="space-y-4 relative z-10 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent flex-grow min-h-0">
                 {timeframeData.map((cat) => (
-                  <div key={cat.name} className="group/item py-4 px-6 border border-black bg-white transition-all duration-300 hover:scale-[1.01] shadow-[0_10px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] relative overflow-hidden">
-                    <BorderBeam colorFrom="#000" colorTo="#000" size={100} duration={8} />
-                    <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-4 relative z-10">
+                  <div key={cat.name} className="group/item py-5 px-6 border border-border bg-white/50 backdrop-blur-sm rounded-xl transition-all duration-300 hover:bg-white hover:shadow-md relative overflow-hidden">
+                    <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-6 relative z-10">
                       {/* Category Label */}
                       <div className="flex items-center gap-4">
-                        <div
-                          className={cn(
-                            "w-10 h-10 flex items-center justify-center text-white transition-transform group-hover/item:scale-110 shadow-lg",
-                            cat.color,
-                          )}
-                        >
+                        <div className={cn(
+                          "w-10 h-10 rounded-lg flex items-center justify-center text-white transition-transform group-hover/item:scale-110",
+                          cat.color
+                        )}>
                           {cat.icon}
                         </div>
                         <div>
-                          <p className="text-[12px] font-black text-black uppercase tracking-widest mb-1">
+                          <p className="text-sm font-semibold text-foreground tracking-tight mb-1">
                             {cat.name}
                           </p>
-                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-sm">
-                            {cat.percentage}
+                          <span className="text-[10px] font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
+                            {cat.percentage} of total
                           </span>
                         </div>
                       </div>
                       
                       {/* Centered Amount */}
                       <div className="text-center">
-                        <span className="text-xl font-black text-black tracking-tighter">
+                        <span className="text-xl font-semibold text-foreground tracking-tight">
                           ₹{cat.amount.toLocaleString("en-IN")}
                         </span>
                       </div>
                       
                       {/* Right Aligned Button */}
                       <div className="flex justify-end">
-                        <Link href="/dashboard/simulation">
-                          <button className="px-6 py-2 bg-black text-white text-[9px] font-black uppercase tracking-[0.2em] hover:bg-slate-900 transition-all flex items-center gap-2 shadow-lg hover:shadow-xl active:scale-95">
-                            Simulate <TrendingUp size={12} />
+                        <Link href={`/dashboard/simulation?category=${encodeURIComponent(cat.name)}`}>
+                          <button className="px-6 py-2 bg-foreground text-background rounded-full text-xs font-semibold hover:opacity-90 transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                            Simulate <TrendingUp size={14} />
                           </button>
                         </Link>
                       </div>
@@ -173,39 +167,39 @@ export default function InsightsPage() {
                 ))}
               </div>
 
-              <div className="mt-12 pt-8 border-t border-slate-50 flex items-center justify-between text-slate-400 relative z-10">
-                <p className="text-[10px] font-black uppercase tracking-widest">
+              <div className="mt-6 pt-6 border-t border-border/50 flex items-center justify-between text-muted-foreground relative z-10 shrink-0">
+                <p className="text-[10px] font-medium uppercase tracking-wider">
                   {t.dashboard.insights.synced}
                 </p>
-                <div className="flex gap-2">
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                  <div className="w-2 h-2 rounded-full bg-slate-200" />
-                  <div className="w-2 h-2 rounded-full bg-slate-200" />
+                <div className="flex gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-border" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-border" />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Spending Patterns Side Cards */}
-          <div className="lg:col-span-4 space-y-6 h-[450px] flex flex-col">
-            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] px-4 mb-4 shrink-0">
+          <div className="lg:col-span-4 flex flex-col h-full min-h-0">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 mb-4 shrink-0">
               Spending Patterns
             </h3>
-            <div className="space-y-2 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-black scrollbar-track-slate-50 pb-6">
+            <div className="space-y-4 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent pb-6 flex-grow min-h-0">
               {spendingPatterns.map((pattern, idx) => (
                 <div
                   key={idx}
-                  className="p-4 border border-black flex gap-4 transition-all hover:scale-[1.02] hover:border-black bg-white group shadow-sm relative overflow-hidden shrink-0"
+                  className="p-6 rounded-2xl border border-border/50 bg-white/60 backdrop-blur-sm flex gap-5 transition-all hover:bg-white hover:shadow-sm group relative overflow-hidden shrink-0"
                 >
-                  <BorderBeam colorFrom="#000" colorTo="#000" size={80} duration={10} />
-                  <div className="w-10 h-10 border border-black flex items-center justify-center shrink-0 group-hover:bg-black group-hover:text-white transition-all relative z-10">
+                  <BorderBeam colorFrom="#000" colorTo="#000" size={100} duration={10} />
+                  <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center shrink-0 group-hover:bg-foreground group-hover:text-background transition-all relative z-10">
                     {pattern.icon}
                   </div>
                   <div className="relative z-10">
-                    <h4 className="font-black text-[11px] tracking-widest uppercase mb-1 text-black">
+                    <h4 className="font-semibold text-sm tracking-tight text-foreground mb-1">
                       {pattern.title}
                     </h4>
-                    <p className="text-[11px] font-bold leading-tight text-slate-500 uppercase tracking-wide">
+                    <p className="text-xs font-medium leading-relaxed text-muted-foreground">
                       {pattern.body}
                     </p>
                   </div>
