@@ -31,7 +31,7 @@ PROFILE = {
     "pan":     "ABCDE1234F",
     "city":    "Mumbai",
 }
-STARTING_BALANCE = 45_320.00
+STARTING_BALANCE = 1_50_000.00
 SALARY           = 62_000.00
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -585,6 +585,18 @@ def build_transactions() -> list[dict]:
     # Inject edge cases then re-sort whole list by timestamp
     txns = _inject_edge_cases(txns, balance)
     txns.sort(key=lambda t: t["transactionTimestamp"])
+
+    # ── Recalculate running balance chronologically ──────────────────────────
+    # Edge-case txns land in the middle of the timeline with stale balance
+    # values. A single forward pass corrects every currentBalance.
+    running = STARTING_BALANCE
+    for t in txns:
+        amt = float(t["amount"])
+        if t["type"] == "CREDIT":
+            running += amt
+        else:
+            running = max(500.0, running - amt)   # floor at Rs.500 — always viable
+        t["currentBalance"] = fmt_bal(running)
 
     return txns
 
