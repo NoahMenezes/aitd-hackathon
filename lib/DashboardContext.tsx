@@ -22,6 +22,10 @@ interface DashboardContextType {
   foodSpend: number;
   setFoodSpend: (val: number) => void;
   handlePurchase: (merchant: string, amount: number, category: string) => void;
+  isChatOpen: boolean;
+  setIsChatOpen: (val: boolean) => void;
+  chatMessages: { role: "user" | "bot"; content: string }[];
+  setChatMessages: (val: { role: "user" | "bot"; content: string }[]) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -52,13 +56,18 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "bot"; content: string }[]>([]);
+
   return (
     <DashboardContext.Provider value={{
       isLinked, setIsLinked,
       balance, setBalance,
       transactions, setTransactions,
       foodSpend, setFoodSpend,
-      handlePurchase
+      handlePurchase,
+      isChatOpen, setIsChatOpen,
+      chatMessages, setChatMessages
     }}>
       {children}
     </DashboardContext.Provider>

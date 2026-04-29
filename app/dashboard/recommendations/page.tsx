@@ -1,26 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   Zap,
   TrendingUp,
   ArrowUpRight,
   Sparkles,
-  MessageSquare,
-  X,
-  Send,
-  User,
-  Bot,
 } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useDashboard } from "@/lib/DashboardContext";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import { cn } from "@/lib/utils";
 
 export default function RecommendationsPage() {
   const { t } = useLanguage();
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<{ role: "user" | "bot"; content: string }[]>([]);
-  const [inputValue, setInputValue] = useState("");
+  const { setIsChatOpen, setChatMessages } = useDashboard();
 
   const recommendations = [
     {
@@ -57,32 +51,13 @@ export default function RecommendationsPage() {
     ]);
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
-
-    const newMessages = [
-      ...chatMessages,
-      { role: "user" as const, content: inputValue },
-    ];
-    setChatMessages(newMessages);
-    setInputValue("");
-
-    setTimeout(() => {
-      setChatMessages([
-        ...newMessages,
-        { role: "bot", content: "That's a great question. Based on your spending trends, maintaining this discipline for 6 months will significantly improve your credit score potential." },
-      ]);
-    }, 1000);
-  };
-
   return (
-    <main className="h-screen flex flex-col pt-8 px-6 pb-10 overflow-hidden font-body bg-transparent relative">
+    <main className="h-screen flex flex-col pt-24 px-6 pb-10 overflow-hidden font-body bg-transparent relative">
       <div className="max-w-[1400px] mx-auto w-full flex flex-col h-full gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
         
         {/* Header matched to Homepage Hero style */}
         <header className="flex flex-col gap-3 shrink-0">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/80 backdrop-blur-sm px-4 py-1.5 text-xs text-muted-foreground font-medium w-fit">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-1.5 text-xs text-muted-foreground font-medium w-fit">
             <Sparkles size={12} className="text-foreground" />
             AI Recommendations
           </div>
@@ -95,7 +70,7 @@ export default function RecommendationsPage() {
           
           {/* LEFT: Ranked Recommendations */}
           <section className="flex flex-col min-h-0">
-            <div className="bg-white/80 backdrop-blur-md border border-border rounded-2xl shadow-sm relative overflow-hidden flex flex-col h-full min-h-0">
+            <div className="bg-white border border-border rounded-2xl shadow-sm relative overflow-hidden flex flex-col h-full min-h-0">
               <BorderBeam colorFrom="#000" colorTo="#000" size={250} duration={6} />
 
               <div className="px-8 pt-8 pb-6 border-b border-border/50 shrink-0 relative z-10">
@@ -115,7 +90,7 @@ export default function RecommendationsPage() {
               <div className="overflow-y-auto flex-grow min-h-0 pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent relative z-10">
                 <div className="divide-y divide-border/30 px-2">
                   {recommendations.map((rec) => (
-                    <div key={rec.rank} className="flex items-center gap-6 py-8 px-6 hover:bg-white/40 transition-colors group rounded-xl">
+                    <div key={rec.rank} className="flex items-center gap-6 py-8 px-6 hover:bg-slate-50 transition-colors group rounded-xl">
                       <div className="w-12 h-12 rounded-xl bg-foreground flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
                         <span className="text-background font-semibold text-lg">{rec.rank}</span>
                       </div>
@@ -130,7 +105,7 @@ export default function RecommendationsPage() {
                       </div>
 
                       <div className="flex flex-col items-end gap-3 shrink-0">
-                        <div className="flex items-center gap-2 text-foreground font-semibold text-[10px] uppercase tracking-wider border border-border/50 bg-secondary px-3 py-1.5 rounded-full whitespace-nowrap">
+                        <div className="flex items-center gap-2 text-foreground font-semibold text-[10px] uppercase tracking-wider border border-border bg-secondary px-3 py-1.5 rounded-full whitespace-nowrap">
                           <TrendingUp size={12} />
                           {rec.impact}
                         </div>
@@ -151,7 +126,7 @@ export default function RecommendationsPage() {
 
           {/* RIGHT: Summary Box */}
           <section className="flex flex-col min-h-0 gap-6">
-            <div className="bg-white/80 backdrop-blur-md border border-border p-10 flex flex-col items-center justify-center text-center relative overflow-hidden flex-grow shrink-0 rounded-2xl">
+            <div className="bg-white border border-border p-10 flex flex-col items-center justify-center text-center relative overflow-hidden flex-grow shrink-0 rounded-2xl shadow-sm">
               <BorderBeam colorFrom="#000" colorTo="#000" size={300} duration={8} />
               
               <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-6 relative z-10">
@@ -167,7 +142,7 @@ export default function RecommendationsPage() {
                 </p>
               </div>
 
-              <div className="mt-8 px-10 py-5 bg-secondary/50 rounded-2xl border border-border/50 relative z-10">
+              <div className="mt-8 px-10 py-5 bg-secondary rounded-2xl border border-border relative z-10">
                 <p className="text-muted-foreground text-xs font-medium leading-relaxed italic">
                   "That's enough for a <span className="text-foreground font-semibold">luxury 4-day trip</span> to Goa or a <span className="text-foreground font-semibold">high-yield portfolio</span> boost."
                 </p>
@@ -181,91 +156,6 @@ export default function RecommendationsPage() {
           </section>
         </div>
       </div>
-
-      {/* AI Chatbot Sidebar */}
-      <div className={cn(
-        "fixed top-[150px] right-0 h-[calc(100%-150px)] w-[400px] bg-white/95 backdrop-blur-xl border-l border-t border-border shadow-2xl z-50 transform transition-transform duration-500 ease-in-out flex flex-col rounded-tl-3xl",
-        isChatOpen ? "translate-x-0" : "translate-x-full"
-      )}>
-        {/* Chat Header */}
-        <div className="p-6 border-b border-border/50 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
-              <Bot size={18} className="text-background" />
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">FinPilot AI</p>
-              <h3 className="text-sm font-semibold tracking-tight text-foreground">Strategy Advisor</h3>
-            </div>
-          </div>
-          <button 
-            onClick={() => setIsChatOpen(false)}
-            className="hover:rotate-90 transition-transform p-1 text-muted-foreground hover:text-foreground"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {/* Chat Messages */}
-        <div className="flex-grow overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-          {chatMessages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center opacity-30">
-              <MessageSquare size={48} className="mb-4" />
-              <p className="text-xs font-semibold uppercase tracking-wider">Ask me about any recommendation</p>
-            </div>
-          )}
-          {chatMessages.map((msg, i) => (
-            <div key={i} className={cn(
-              "flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-2",
-              msg.role === "user" ? "items-end" : "items-start"
-            )}>
-              <div className={cn(
-                "max-w-[85%] p-4 text-xs font-medium leading-relaxed rounded-2xl shadow-sm",
-                msg.role === "user" 
-                  ? "bg-foreground text-background" 
-                  : "bg-secondary text-foreground"
-              )}>
-                {msg.content}
-              </div>
-              <div className="flex items-center gap-2 px-1">
-                <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest">
-                  {msg.role === "user" ? "You" : "FinPilot"}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Chat Input */}
-        <form onSubmit={handleSendMessage} className="p-6 border-t border-border/50 bg-secondary/30 flex items-center gap-3">
-          <input 
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Type your question..."
-            className="flex-grow bg-white border border-border px-4 py-3 text-xs font-medium rounded-full focus:outline-none focus:ring-1 focus:ring-foreground transition-all"
-          />
-          <button 
-            type="submit"
-            className="bg-foreground text-background p-3 rounded-full hover:opacity-90 transition-all shadow-md active:scale-95"
-          >
-            <Send size={16} />
-          </button>
-        </form>
-      </div>
-
-      {/* Chat Toggle Button */}
-      <button 
-        onClick={() => setIsChatOpen(true)}
-        className={cn(
-          "fixed bottom-8 right-8 w-16 h-16 bg-foreground text-background rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-all z-40 group overflow-hidden",
-          isChatOpen ? "scale-0 opacity-0" : "scale-100 opacity-100"
-        )}
-      >
-        <BorderBeam colorFrom="#fff" colorTo="#fff" size={50} duration={4} />
-        <MessageSquare size={24} className="relative z-10" />
-      </button>
-
     </main>
   );
 }

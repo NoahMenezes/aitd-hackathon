@@ -14,6 +14,7 @@ import {
   Clock,
   Building2,
   CheckCircle2,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -51,6 +52,7 @@ export default function InsightsPage() {
   };
 
   const timeframeData = dataMap[timeframe];
+  const totalSpend = timeframeData.reduce((acc, cat) => acc + cat.amount, 0);
 
   const spendingPatterns = [
     {
@@ -76,7 +78,7 @@ export default function InsightsPage() {
   ];
 
   return (
-    <main className="h-screen flex flex-col pt-8 px-6 pb-10 overflow-hidden font-body bg-transparent">
+    <main className="h-screen flex flex-col pt-24 px-6 pb-10 overflow-hidden font-body bg-transparent">
       <div className="max-w-[1400px] mx-auto w-full flex flex-col h-full space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
         
         {/* Header matched to Homepage Hero style */}
@@ -91,83 +93,112 @@ export default function InsightsPage() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-grow min-h-0">
-          {/* Main Chart Card */}
+          {/* Main Chart Card — Matched to Simulation "Current Pace" Template */}
           <div className="lg:col-span-8 flex flex-col h-full min-h-0">
-            <div className="bg-white/80 backdrop-blur-md p-8 border border-border shadow-sm relative overflow-hidden flex flex-col h-full min-h-0">
+            <div className="bg-white/80 backdrop-blur-md border border-border rounded-2xl shadow-sm relative overflow-hidden flex flex-col h-full min-h-0">
               <BorderBeam colorFrom="#000" colorTo="#000" size={300} duration={6} />
               
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-8 border-b border-border/50 relative z-10 shrink-0">
-                <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-                    Your Spendings
-                  </h3>
+              {/* Refactored Header to match Simulation Template */}
+              <div className="px-8 pt-8 pb-6 border-b border-border/50 shrink-0 relative z-10">
+                <div className="flex items-center justify-between gap-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
+                      <BarChart3 size={16} className="text-background" />
+                    </div>
+                    <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                      Spending Analysis
+                    </span>
+                  </div>
+                  
+                  {/* Integrated Timeframe Selector */}
                   <div className="relative inline-block group">
                     <select
                       value={timeframe}
                       onChange={(e) => setTimeframe(e.target.value as Timeframe)}
-                      className="appearance-none bg-foreground text-background font-semibold text-sm px-6 py-3 pr-12 rounded-full hover:opacity-90 transition-all cursor-pointer focus:outline-none border-none shadow-md"
+                      className="appearance-none bg-secondary/50 text-foreground font-semibold text-xs uppercase tracking-wider px-4 py-2 pr-10 rounded-full hover:bg-secondary transition-all cursor-pointer focus:outline-none border border-border/50"
                     >
                       <option value="yearly">Yearly View</option>
                       <option value="monthly">Monthly View</option>
                       <option value="weekly">Weekly View</option>
                     </select>
-                    <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-background transition-colors" />
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" />
                   </div>
                 </div>
 
-                <div className="text-left md:text-right">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                    Total Spending
-                  </p>
-                  <h2 className="text-5xl font-semibold text-foreground tracking-tighter">
-                    ₹{timeframeData.reduce((acc, cat) => acc + cat.amount, 0).toLocaleString("en-IN")}
-                  </h2>
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-foreground tracking-tight mb-1">
+                      Your Spendings
+                    </h2>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Detailed breakdown of outflows across major categories.
+                    </p>
+                  </div>
+                  <div className="text-left md:text-right">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                      Total {timeframe}
+                    </p>
+                    <h2 className="text-4xl font-semibold text-foreground tracking-tighter">
+                      ₹{totalSpend.toLocaleString("en-IN")}
+                    </h2>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-4 relative z-10 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent flex-grow min-h-0">
-                {timeframeData.map((cat) => (
-                  <div key={cat.name} className="group/item py-5 px-6 border border-border bg-white/50 backdrop-blur-sm rounded-xl transition-all duration-300 hover:bg-white hover:shadow-md relative overflow-hidden">
-                    <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-6 relative z-10">
-                      {/* Category Label */}
+              {/* Grid Header (Matching Simulation layout) */}
+              <div className="grid grid-cols-[1.5fr_1fr_1fr_0.5fr] divide-x divide-border/50 border-b border-border/50 shrink-0 relative z-10 bg-secondary/10">
+                <div className="px-8 py-3"><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Category</p></div>
+                <div className="px-4 py-3 text-center"><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Amount</p></div>
+                <div className="px-4 py-3 text-center"><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Impact</p></div>
+                <div className="px-8 py-3 text-right"><p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Simulation</p></div>
+              </div>
+
+              <div className="overflow-y-auto flex-grow min-h-0 pr-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent relative z-10">
+                <div className="divide-y divide-border/30">
+                  {timeframeData.map((cat) => (
+                    <div key={cat.name} className="grid grid-cols-[1.5fr_1fr_1fr_0.5fr] items-center gap-4 px-8 py-5 hover:bg-white/40 transition-colors group">
+                      {/* Col 1: Icon + Name */}
                       <div className="flex items-center gap-4">
                         <div className={cn(
-                          "w-10 h-10 rounded-lg flex items-center justify-center text-white transition-transform group-hover/item:scale-110",
+                          "w-10 h-10 rounded-lg flex items-center justify-center text-white transition-transform group-hover:scale-105 shadow-sm",
                           cat.color
                         )}>
                           {cat.icon}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-foreground tracking-tight mb-1">
-                            {cat.name}
-                          </p>
-                          <span className="text-[10px] font-medium text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">
-                            {cat.percentage} of total
-                          </span>
+                          <p className="text-sm font-semibold text-foreground tracking-tight">{cat.name}</p>
+                          <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Active Stream</p>
                         </div>
                       </div>
                       
-                      {/* Centered Amount */}
+                      {/* Col 2: Amount (Centered) */}
                       <div className="text-center">
-                        <span className="text-xl font-semibold text-foreground tracking-tight">
+                        <p className="text-base font-semibold text-foreground tracking-tight">
                           ₹{cat.amount.toLocaleString("en-IN")}
+                        </p>
+                      </div>
+                      
+                      {/* Col 3: Impact/Percentage */}
+                      <div className="text-center">
+                        <span className="text-[10px] font-semibold text-foreground bg-secondary px-3 py-1 rounded-full border border-border/50">
+                          {cat.percentage}
                         </span>
                       </div>
                       
-                      {/* Right Aligned Button */}
+                      {/* Col 4: Action Button */}
                       <div className="flex justify-end">
                         <Link href={`/dashboard/simulation?category=${encodeURIComponent(cat.name)}`}>
-                          <button className="px-6 py-2 bg-foreground text-background rounded-full text-xs font-semibold hover:opacity-90 transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                            Simulate <TrendingUp size={14} />
+                          <button className="w-8 h-8 rounded-full border border-border flex items-center justify-center hover:bg-foreground hover:text-background transition-all group/btn shadow-sm">
+                            <TrendingUp size={14} className="group-hover/btn:scale-110 transition-transform" />
                           </button>
                         </Link>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-border/50 flex items-center justify-between text-muted-foreground relative z-10 shrink-0">
+              <div className="mt-auto px-8 py-4 border-t border-border/50 flex items-center justify-between text-muted-foreground relative z-10 shrink-0 bg-secondary/5">
                 <p className="text-[10px] font-medium uppercase tracking-wider">
                   {t.dashboard.insights.synced}
                 </p>

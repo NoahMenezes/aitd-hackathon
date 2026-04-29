@@ -2,6 +2,7 @@
 
 import { Navbar } from "@/components/Navbar";
 import { DashboardProvider } from "@/lib/DashboardContext";
+import ChatbotSidebar from "@/components/ChatbotSidebar";
 
 export default function DashboardLayout({
   children,
@@ -10,9 +11,10 @@ export default function DashboardLayout({
 }) {
   return (
     <DashboardProvider>
-      <div className="min-h-screen bg-transparent">
+      <div className="min-h-screen bg-transparent relative">
         <Navbar />
         {children}
+        <ChatbotSidebar />
       </div>
     </DashboardProvider>
   );

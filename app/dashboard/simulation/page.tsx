@@ -19,31 +19,31 @@ import { BorderBeam } from "@/components/magicui/border-beam";
 // ─── Hardcoded data — swap with real backend responses later ────────────────
 
 const ALL_CATEGORIES = [
-  { name: "Food & Dining",  icon: ShoppingBag,    monthly: 7500, yearly: 90000,  trend: "+12%" },
-  { name: "Shopping",       icon: ShoppingBag,    monthly: 4900, yearly: 58800,  trend: "+8%"  },
-  { name: "Transport",      icon: Truck,           monthly: 2800, yearly: 33600,  trend: "+3%"  },
-  { name: "Subscriptions",  icon: Calendar,        monthly: 2100, yearly: 25200,  trend: "+0%"  },
-  { name: "Others",         icon: MoreHorizontal,  monthly: 1400, yearly: 16800,  trend: "+5%"  },
+  { name: "Food & Dining", icon: ShoppingBag, monthly: 7500, yearly: 90000, trend: "+12%" },
+  { name: "Shopping", icon: ShoppingBag, monthly: 4900, yearly: 58800, trend: "+8%" },
+  { name: "Transport", icon: Truck, monthly: 2800, yearly: 33600, trend: "+3%" },
+  { name: "Subscriptions", icon: Calendar, monthly: 2100, yearly: 25200, trend: "+0%" },
+  { name: "Others", icon: MoreHorizontal, monthly: 1400, yearly: 16800, trend: "+5%" },
 ];
 
 const TOTAL_MONTHLY = 18700;
-const TOTAL_YEARLY  = 224400;
-const TOTAL_3YR     = 673200;
+const TOTAL_YEARLY = 224400;
+const TOTAL_3YR = 673200;
 
 const CATEGORY_PLANS: Record<string, { easy: number; moderate: number; hard: number }> = {
-  "Food & Dining":  { easy: 10, moderate: 20, hard: 35 },
-  "Shopping":       { easy: 8,  moderate: 18, hard: 30 },
-  "Transport":      { easy: 5,  moderate: 12, hard: 20 },
-  "Subscriptions":  { easy: 5,  moderate: 15, hard: 25 },
-  "Others":         { easy: 5,  moderate: 10, hard: 20 },
+  "Food & Dining": { easy: 10, moderate: 20, hard: 35 },
+  "Shopping": { easy: 8, moderate: 18, hard: 30 },
+  "Transport": { easy: 5, moderate: 12, hard: 20 },
+  "Subscriptions": { easy: 5, moderate: 15, hard: 25 },
+  "Others": { easy: 5, moderate: 10, hard: 20 },
 };
 
 const ADHERENCE = { easy: 88, moderate: 62, hard: 29 };
 
 const PLAN_META = {
-  easy:     { label: "Easy",     description: "Small painless changes. Reduce discretionary spend slightly."     },
-  moderate: { label: "Moderate", description: "Balanced reductions. Noticeable impact with manageable effort."   },
-  hard:     { label: "Hard",     description: "Aggressive cuts. Maximum savings, requires strict discipline."     },
+  easy: { label: "Easy", description: "Small painless changes. Reduce discretionary spend slightly." },
+  moderate: { label: "Moderate", description: "Balanced reductions. Noticeable impact with manageable effort." },
+  hard: { label: "Hard", description: "Aggressive cuts. Maximum savings, requires strict discipline." },
 };
 
 type PlanKey = "easy" | "moderate" | "hard";
@@ -59,29 +59,29 @@ function SimulationContent() {
     : null;
 
   const paceMonthly = isCategory ? catData!.monthly : TOTAL_MONTHLY;
-  const paceYearly  = isCategory ? catData!.yearly  : TOTAL_YEARLY;
-  const pace3yr     = isCategory ? catData!.yearly * 3 : TOTAL_3YR;
-  const paceTrend   = isCategory ? catData!.trend : "+7%";
+  const paceYearly = isCategory ? catData!.yearly : TOTAL_YEARLY;
+  const pace3yr = isCategory ? catData!.yearly * 3 : TOTAL_3YR;
+  const paceTrend = isCategory ? catData!.trend : "+7%";
 
   const planCuts = isCategory
     ? CATEGORY_PLANS[catData!.name] ?? { easy: 10, moderate: 20, hard: 30 }
     : { easy: 10, moderate: 20, hard: 30 };
 
-  const cutPct  = planCuts[selectedPlan];
+  const cutPct = planCuts[selectedPlan];
   const monthlySave = Math.round((paceMonthly * cutPct) / 100);
-  const yearlySave  = monthlySave * 12;
-  const adherence   = ADHERENCE[selectedPlan];
+  const yearlySave = monthlySave * 12;
+  const adherence = ADHERENCE[selectedPlan];
 
   const improvementRows = isCategory
     ? null
     : ALL_CATEGORIES.map((cat) => {
-        const pct  = CATEGORY_PLANS[cat.name]?.[selectedPlan] ?? 10;
-        const save = Math.round((cat.monthly * pct) / 100);
-        return { ...cat, cut_pct: pct, monthly_save: save, yearly_save: save * 12 };
-      });
+      const pct = CATEGORY_PLANS[cat.name]?.[selectedPlan] ?? 10;
+      const save = Math.round((cat.monthly * pct) / 100);
+      return { ...cat, cut_pct: pct, monthly_save: save, yearly_save: save * 12 };
+    });
 
   return (
-    <main className="h-screen flex flex-col pt-8 px-6 pb-10 overflow-hidden font-body bg-transparent">
+    <main className="h-screen flex flex-col pt-24 px-6 pb-10 overflow-hidden font-body bg-transparent">
       <div className="max-w-[1400px] mx-auto w-full flex flex-col h-full gap-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
 
         {/* Header matched to Homepage Hero style */}
@@ -109,14 +109,14 @@ function SimulationContent() {
                   <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
                     <TrendingUp size={16} className="text-background" />
                   </div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     Current Pace
                   </span>
                 </div>
-                <h2 className="text-xl font-semibold text-foreground tracking-tight mb-1">
+                <h2 className="text-2xl font-semibold text-foreground tracking-tight mb-2">
                   Baseline Projection
                 </h2>
-                <p className="text-xs font-medium text-muted-foreground">
+                <p className="text-sm font-medium text-muted-foreground">
                   {isCategory
                     ? <>Based on {catData!.name} spend of <span className="text-foreground font-semibold">₹{paceMonthly.toLocaleString("en-IN")}/mo</span></>
                     : <>Based on total monthly spend of <span className="text-foreground font-semibold">₹{paceMonthly.toLocaleString("en-IN")}</span></>}
@@ -127,8 +127,8 @@ function SimulationContent() {
                 <div className="grid grid-cols-3 divide-x divide-border/50 border-b border-border/50 shrink-0 relative z-10">
                   {[
                     { label: "Per Month", value: `₹${paceMonthly.toLocaleString("en-IN")}` },
-                    { label: "Per Year",  value: `₹${paceYearly.toLocaleString("en-IN")}`  },
-                    { label: "3-Year",    value: `₹${pace3yr.toLocaleString("en-IN")}`      },
+                    { label: "Per Year", value: `₹${paceYearly.toLocaleString("en-IN")}` },
+                    { label: "3-Year", value: `₹${pace3yr.toLocaleString("en-IN")}` },
                   ].map((item) => (
                     <div key={item.label} className="px-6 py-5 text-center">
                       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">{item.label}</p>
@@ -153,10 +153,10 @@ function SimulationContent() {
                 {isCategory ? (
                   <div className="divide-y divide-border/30">
                     {[
-                      { status: "Monthly Spend",    cost: `₹${paceMonthly.toLocaleString("en-IN")}` },
-                      { status: "Yearly Spend",     cost: `₹${paceYearly.toLocaleString("en-IN")}` },
-                      { status: "3-Year Projection",cost: `₹${pace3yr.toLocaleString("en-IN")}` },
-                      { status: "Monthly Trend",    cost: paceTrend, highlight: true },
+                      { status: "Monthly Spend", cost: `₹${paceMonthly.toLocaleString("en-IN")}` },
+                      { status: "Yearly Spend", cost: `₹${paceYearly.toLocaleString("en-IN")}` },
+                      { status: "3-Year Projection", cost: `₹${pace3yr.toLocaleString("en-IN")}` },
+                      { status: "Monthly Trend", cost: paceTrend, highlight: true },
                     ].map((row) => (
                       <div key={row.status} className="grid grid-cols-2 divide-x divide-border/30 hover:bg-white/40 transition-colors">
                         <div className="px-8 py-5 text-sm font-medium text-muted-foreground">{row.status}</div>
@@ -217,11 +217,11 @@ function SimulationContent() {
                   <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
                     <TrendingDown size={16} className="text-background" />
                   </div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                     Optimization
                   </span>
                 </div>
-                <h2 className="text-xl font-semibold text-foreground tracking-tight mb-4">
+                <h2 className="text-2xl font-semibold text-foreground tracking-tight mb-4">
                   Improvement Plan
                 </h2>
 
@@ -250,16 +250,16 @@ function SimulationContent() {
                 </div>
               )}
 
-              <div className="px-8 py-4 border-b border-border/30 shrink-0 relative z-10">
-                <p className="text-xs font-medium text-muted-foreground leading-relaxed italic">
+              <div className="px-8 py-5 border-b border-border/30 shrink-0 relative z-10">
+                <p className="text-sm font-medium text-muted-foreground leading-relaxed italic">
                   {PLAN_META[selectedPlan].description}
                 </p>
               </div>
 
-              <div className="px-8 py-5 border-b border-border/50 shrink-0 relative z-10">
+              <div className="px-8 py-6 border-b border-border/50 shrink-0 relative z-10">
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Adherence Rate</span>
-                  <span className="text-xs font-bold text-foreground">{adherence}%</span>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">How likely you follow this plan</span>
+                  <span className="text-sm font-bold text-foreground">{adherence}%</span>
                 </div>
                 <div className="h-2 bg-secondary rounded-full w-full overflow-hidden">
                   <div className="h-full bg-foreground transition-all duration-700 rounded-full" style={{ width: `${adherence}%` }} />
@@ -270,10 +270,10 @@ function SimulationContent() {
                 {isCategory ? (
                   <div className="divide-y divide-border/30">
                     {[
-                      { metric: "Category",         value: catData!.name, highlight: false },
-                      { metric: "Reduction Target", value: `-${cutPct}%`,  highlight: true },
-                      { metric: "Monthly Saving",   value: `₹${monthlySave.toLocaleString("en-IN")}`, highlight: false },
-                      { metric: "Yearly Saving",    value: `₹${yearlySave.toLocaleString("en-IN")}`,  highlight: false },
+                      { metric: "Category", value: catData!.name, highlight: false },
+                      { metric: "Reduction Target", value: `-${cutPct}%`, highlight: true },
+                      { metric: "Monthly Saving", value: `₹${monthlySave.toLocaleString("en-IN")}`, highlight: false },
+                      { metric: "Yearly Saving", value: `₹${yearlySave.toLocaleString("en-IN")}`, highlight: false },
                     ].map((row) => (
                       <div key={row.metric} className="grid grid-cols-2 divide-x divide-border/30 hover:bg-white/40 transition-colors">
                         <div className="px-8 py-5 text-sm font-medium text-muted-foreground">{row.metric}</div>
