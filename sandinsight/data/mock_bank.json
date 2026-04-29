@@ -1,0 +1,347 @@
+{
+  "ver": "2.0.0",
+  "timestamp": "2026-04-29T10:00:00.000+05:30",
+  "txnid": "f35761ac-4a18-11e8-96ff-0277a9fbfed1",
+  "Account": {
+    "linkedAccRef": "XXXX-XXXX-1234",
+    "maskedAccNumber": "XXXXXXXX1234",
+    "type": "savings",
+    "Profile": {
+      "Holders": {
+        "Holder": [
+          {
+            "name": "Nikhil Sharma",
+            "dob": "1998-06-15",
+            "mobile": "9876543210",
+            "nominee": "Registered",
+            "email": "nikhil.sharma@example.com",
+            "pan": "ABCDE1234F",
+            "ckycCompliance": "true"
+          }
+        ]
+      }
+    },
+    "Summary": {
+      "currentBalance": "5733.75",
+      "currency": "INR",
+      "branch": "Mumbai Main Branch",
+      "ifscCode": "SBIN0001234",
+      "openingDate": "2020-03-15",
+      "status": "ACTIVE",
+      "facility": "OD",
+      "currentODLimit": "0"
+    },
+    "Transactions": {
+      "Transaction": [
+        {
+          "txnId": "TXN20260401001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "450.00",
+          "currentBalance": "44780.75",
+          "transactionTimestamp": "2026-04-01T12:30:00.000+05:30",
+          "valueDate": "2026-04-01",
+          "narration": "UPI/ZOMATO/OrderFood/Payment",
+          "reference": "ZMT20260401001"
+        },
+        {
+          "txnId": "TXN20260402001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "1299.00",
+          "currentBalance": "43481.75",
+          "transactionTimestamp": "2026-04-02T14:15:00.000+05:30",
+          "valueDate": "2026-04-02",
+          "narration": "UPI/AMAZON/Electronics/Purchase",
+          "reference": "AMZ20260402001"
+        },
+        {
+          "txnId": "TXN20260403001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "320.00",
+          "currentBalance": "43161.75",
+          "transactionTimestamp": "2026-04-03T19:45:00.000+05:30",
+          "valueDate": "2026-04-03",
+          "narration": "UPI/SWIGGY/FoodDelivery/Payment",
+          "reference": "SWG20260403001"
+        },
+        {
+          "txnId": "TXN20260404001",
+          "type": "CREDIT",
+          "mode": "NEFT",
+          "amount": "55000.00",
+          "currentBalance": "98161.75",
+          "transactionTimestamp": "2026-04-04T09:00:00.000+05:30",
+          "valueDate": "2026-04-04",
+          "narration": "NEFT/SALARY/APR2026/EMPLOYER",
+          "reference": "SAL20260404001"
+        },
+        {
+          "txnId": "TXN20260405001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "2499.00",
+          "currentBalance": "95662.75",
+          "transactionTimestamp": "2026-04-05T11:20:00.000+05:30",
+          "valueDate": "2026-04-05",
+          "narration": "UPI/FLIPKART/Clothing/Purchase",
+          "reference": "FLK20260405001"
+        },
+        {
+          "txnId": "TXN20260406001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "680.00",
+          "currentBalance": "94982.75",
+          "transactionTimestamp": "2026-04-06T20:10:00.000+05:30",
+          "valueDate": "2026-04-06",
+          "narration": "UPI/ZOMATO/DinnerOrder/Payment",
+          "reference": "ZMT20260406001"
+        },
+        {
+          "txnId": "TXN20260407001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "150.00",
+          "currentBalance": "94832.75",
+          "transactionTimestamp": "2026-04-07T08:30:00.000+05:30",
+          "valueDate": "2026-04-07",
+          "narration": "UPI/DUNZO/Groceries/Payment",
+          "reference": "DNZ20260407001"
+        },
+        {
+          "txnId": "TXN20260408001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "3500.00",
+          "currentBalance": "91332.75",
+          "transactionTimestamp": "2026-04-08T16:45:00.000+05:30",
+          "valueDate": "2026-04-08",
+          "narration": "UPI/MYNTRA/Fashion/Purchase",
+          "reference": "MYN20260408001"
+        },
+        {
+          "txnId": "TXN20260409001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "550.00",
+          "currentBalance": "90782.75",
+          "transactionTimestamp": "2026-04-09T13:00:00.000+05:30",
+          "valueDate": "2026-04-09",
+          "narration": "UPI/SWIGGY/LunchOrder/Payment",
+          "reference": "SWG20260409001"
+        },
+        {
+          "txnId": "TXN20260410001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "899.00",
+          "currentBalance": "89883.75",
+          "transactionTimestamp": "2026-04-10T18:20:00.000+05:30",
+          "valueDate": "2026-04-10",
+          "narration": "UPI/BIGBASKET/Groceries/Payment",
+          "reference": "BBK20260410001"
+        },
+        {
+          "txnId": "TXN20260411001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "1200.00",
+          "currentBalance": "88683.75",
+          "transactionTimestamp": "2026-04-11T21:00:00.000+05:30",
+          "valueDate": "2026-04-11",
+          "narration": "UPI/ZOMATO/PartyOrder/Payment",
+          "reference": "ZMT20260411001"
+        },
+        {
+          "txnId": "TXN20260412001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "4999.00",
+          "currentBalance": "83684.75",
+          "transactionTimestamp": "2026-04-12T10:30:00.000+05:30",
+          "valueDate": "2026-04-12",
+          "narration": "UPI/AMAZON/Gadgets/Purchase",
+          "reference": "AMZ20260412001"
+        },
+        {
+          "txnId": "TXN20260413001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "15000.00",
+          "currentBalance": "68684.75",
+          "transactionTimestamp": "2026-04-13T09:00:00.000+05:30",
+          "valueDate": "2026-04-13",
+          "narration": "UPI/RENT/APR2026/LANDLORD",
+          "reference": "RNT20260413001"
+        },
+        {
+          "txnId": "TXN20260414001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "799.00",
+          "currentBalance": "67885.75",
+          "transactionTimestamp": "2026-04-14T15:45:00.000+05:30",
+          "valueDate": "2026-04-14",
+          "narration": "UPI/NETFLIX/Subscription/Payment",
+          "reference": "NFX20260414001"
+        },
+        {
+          "txnId": "TXN20260415001",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "380.00",
+          "currentBalance": "67505.75",
+          "transactionTimestamp": "2026-04-15T12:00:00.000+05:30",
+          "valueDate": "2026-04-15",
+          "narration": "UPI/SWIGGY/SnacksOrder/Payment",
+          "reference": "SWG20260415001"
+        },
+        {
+          "txnId": "TXN20260429016",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "750.00",
+          "currentBalance": "44480.75",
+          "transactionTimestamp": "2026-04-29T16:19:25.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/ZOMATO/Purchase/Payment",
+          "reference": "ZOM20260429016"
+        },
+        {
+          "txnId": "TXN20260429017",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "620.00",
+          "currentBalance": "43860.75",
+          "transactionTimestamp": "2026-04-29T16:39:18.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/SWIGGY/Purchase/Payment",
+          "reference": "SWI20260429017"
+        },
+        {
+          "txnId": "TXN20260429018",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "3499.00",
+          "currentBalance": "40361.75",
+          "transactionTimestamp": "2026-04-29T16:39:18.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/AMAZON/Purchase/Payment",
+          "reference": "AMA20260429018"
+        },
+        {
+          "txnId": "TXN20260429019",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "280.00",
+          "currentBalance": "40081.75",
+          "transactionTimestamp": "2026-04-29T16:39:18.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/UBER/Purchase/Payment",
+          "reference": "UBE20260429019"
+        },
+        {
+          "txnId": "TXN20260429020",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "450.00",
+          "currentBalance": "39631.75",
+          "transactionTimestamp": "2026-04-29T16:45:07.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/ZOMATO/Purchase/Payment",
+          "reference": "ZOM20260429020"
+        },
+        {
+          "txnId": "TXN20260429021",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "1800.00",
+          "currentBalance": "37831.75",
+          "transactionTimestamp": "2026-04-29T16:57:22.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/BIGBASKET/Purchase/Payment",
+          "reference": "BIG20260429021"
+        },
+        {
+          "txnId": "TXN20260429022",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "12000.00",
+          "currentBalance": "25831.75",
+          "transactionTimestamp": "2026-04-29T16:57:22.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/MAKEMYTRIP/Purchase/Payment",
+          "reference": "MAK20260429022"
+        },
+        {
+          "txnId": "TXN20260429023",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "2500.00",
+          "currentBalance": "23331.75",
+          "transactionTimestamp": "2026-04-29T16:57:22.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/SHELL/Purchase/Payment",
+          "reference": "SHE20260429023"
+        },
+        {
+          "txnId": "TXN20260429024",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "649.00",
+          "currentBalance": "22682.75",
+          "transactionTimestamp": "2026-04-29T16:57:22.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/NETFLIX/Purchase/Payment",
+          "reference": "NET20260429024"
+        },
+        {
+          "txnId": "TXN20260429025",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "1800.00",
+          "currentBalance": "20882.75",
+          "transactionTimestamp": "2026-04-29T16:59:40.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/BIGBASKET/Purchase/Payment",
+          "reference": "BIG20260429025"
+        },
+        {
+          "txnId": "TXN20260429026",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "12000.00",
+          "currentBalance": "8882.75",
+          "transactionTimestamp": "2026-04-29T16:59:40.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/MAKEMYTRIP/Purchase/Payment",
+          "reference": "MAK20260429026"
+        },
+        {
+          "txnId": "TXN20260429027",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "2500.00",
+          "currentBalance": "6382.75",
+          "transactionTimestamp": "2026-04-29T16:59:40.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/SHELL/Purchase/Payment",
+          "reference": "SHE20260429027"
+        },
+        {
+          "txnId": "TXN20260429028",
+          "type": "DEBIT",
+          "mode": "UPI",
+          "amount": "649.00",
+          "currentBalance": "5733.75",
+          "transactionTimestamp": "2026-04-29T16:59:40.000+05:30",
+          "valueDate": "2026-04-29",
+          "narration": "UPI/NETFLIX/Purchase/Payment",
+          "reference": "NET20260429028"
+        }
+      ]
+    }
+  }
+}
