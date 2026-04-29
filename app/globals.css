@@ -40,12 +40,12 @@
   --radius-md: 0px;
   --radius-sm: 0px;
 
-  --animate-border-beam: border-beam 4s linear infinite;
+  --animate-border-beam: border-beam var(--duration, 4s) linear infinite;
 
   @keyframes border-beam {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+    100% {
+      offset-distance: 100%;
+    }
   }
 }
 

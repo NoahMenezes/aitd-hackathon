@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { BorderBeam } from "@/components/magicui/border-beam";
 
 export default function DashboardPage() {
   const {
@@ -54,6 +55,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="max-w-md w-full bg-white/70 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] overflow-hidden border border-slate-100 p-10 text-center space-y-8 relative z-10 animate-in fade-in zoom-in duration-500">
+          <BorderBeam colorFrom="#000" colorTo="#000" size={200} />
           <div className="mx-auto w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mb-6 shadow-inner transition-all duration-500 hover:scale-105">
             <Building2 className="w-10 h-10 text-indigo-600" />
           </div>
@@ -109,77 +111,48 @@ export default function DashboardPage() {
               {t.dashboard.overview.title}
             </h1>
           </div>
-          <div className="bg-white/70 backdrop-blur-xl px-6 py-4 rounded-[2rem] text-xs font-bold flex items-center gap-4 border border-slate-100 shadow-sm transition-all hover:shadow-md">
-            <div className="flex items-center gap-2 text-green-600">
+          <div className="bg-white/70 backdrop-blur-xl px-6 py-4 rounded-[2rem] text-xs font-bold flex items-center gap-4 border border-slate-100 shadow-sm transition-all hover:shadow-md relative overflow-hidden">
+            <BorderBeam colorFrom="#000" colorTo="#000" size={100} duration={12} />
+            <div className="flex items-center gap-2 text-green-600 relative z-10">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               <span>{t.dashboard.overview.aaStatus}</span>
             </div>
           </div>
         </header>
 
-        {/* Metrics Row - Refined with Glassmorphism and better alignment */}
+        {/* Metrics Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="group relative bg-white/80 backdrop-blur-xl rounded-[2rem] p-10 border border-white shadow-xl shadow-slate-200/20 hover:shadow-2xl transition-all duration-500 flex flex-col justify-between min-h-[220px]">
-            <div className="flex items-center justify-between">
-              <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                {t.dashboard.overview.yearlySpending}
-              </p>
-              <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
-                <Calendar size={18} />
+          {[
+            { label: t.dashboard.overview.yearlySpending, value: "₹6,42,800", sub: t.dashboard.overview.perYear, icon: <Calendar size={18} />, color: "text-indigo-600", bg: "bg-indigo-50" },
+            { label: t.dashboard.overview.monthlySpending, value: `₹${(foodSpend + 13900).toLocaleString("en-IN")}`, sub: t.dashboard.overview.perMonth, icon: <Clock size={18} />, color: "text-green-600", bg: "bg-green-50" },
+            { label: t.dashboard.overview.weeklySpending, value: "₹18,400", sub: t.dashboard.overview.perWeek, icon: <Activity size={18} />, color: "text-orange-600", bg: "bg-orange-50" }
+          ].map((item, idx) => (
+            <div key={idx} className="group relative bg-white/80 backdrop-blur-xl rounded-[2rem] p-10 border border-white shadow-xl shadow-slate-200/20 hover:shadow-2xl transition-all duration-500 flex flex-col justify-between min-h-[220px] overflow-hidden">
+              <BorderBeam colorFrom="#000" colorTo="#000" size={150} duration={8} delay={idx * 2} />
+              <div className="flex items-center justify-between relative z-10">
+                <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                  {item.label}
+                </p>
+                <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", item.bg, item.color)}>
+                  {item.icon}
+                </div>
+              </div>
+              <div className="relative z-10">
+                <h2 className="text-6xl font-black text-slate-900 tracking-tighter mb-2">
+                  {item.value}
+                </h2>
+                <span className={cn("text-[11px] font-black px-3 py-1.5 rounded-md tracking-widest uppercase", item.bg, item.color)}>
+                  {item.sub}
+                </span>
               </div>
             </div>
-            <div>
-              <h2 className="text-6xl font-black text-slate-900 tracking-tighter mb-2">
-                ₹6,42,800
-              </h2>
-              <span className="text-[11px] font-black bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-md tracking-widest uppercase">
-                {t.dashboard.overview.perYear}
-              </span>
-            </div>
-          </div>
-
-          <div className="group relative bg-white/80 backdrop-blur-xl rounded-[2rem] p-10 border border-white shadow-xl shadow-slate-200/20 hover:shadow-2xl transition-all duration-500 flex flex-col justify-between min-h-[220px]">
-            <div className="flex items-center justify-between">
-              <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                {t.dashboard.overview.monthlySpending}
-              </p>
-              <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
-                <Clock size={18} />
-              </div>
-            </div>
-            <div>
-              <h2 className="text-6xl font-black text-slate-900 tracking-tighter mb-2">
-                ₹{(foodSpend + 13900).toLocaleString("en-IN")}
-              </h2>
-              <span className="text-[11px] font-black bg-green-50 text-green-600 px-3 py-1.5 rounded-md tracking-widest uppercase">
-                {t.dashboard.overview.perMonth}
-              </span>
-            </div>
-          </div>
-
-          <div className="group relative bg-white/80 backdrop-blur-xl rounded-[2rem] p-10 border border-white shadow-xl shadow-slate-200/20 hover:shadow-2xl transition-all duration-500 flex flex-col justify-between min-h-[220px]">
-            <div className="flex items-center justify-between">
-              <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                {t.dashboard.overview.weeklySpending}
-              </p>
-              <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-orange-600">
-                <Activity size={18} />
-              </div>
-            </div>
-            <div>
-              <h2 className="text-6xl font-black text-slate-900 tracking-tighter mb-2">
-                ₹18,400
-              </h2>
-              <span className="text-[11px] font-black bg-orange-50 text-orange-600 px-3 py-1.5 rounded-md tracking-widest uppercase">
-                {t.dashboard.overview.perWeek}
-              </span>
-            </div>
-          </div>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           {/* Highest Spending Card */}
           <div className="bg-white/90 backdrop-blur-xl rounded-[2rem] p-10 border border-white shadow-2xl shadow-slate-200/30 relative overflow-hidden group flex flex-col justify-between">
+            <BorderBeam colorFrom="#000" colorTo="#000" size={300} duration={15} />
             <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-125 group-hover:opacity-[0.07] transition-all duration-700">
               <Coffee size={200} />
             </div>
@@ -213,8 +186,9 @@ export default function DashboardPage() {
           </div>
 
           {/* Potential Consequences Card */}
-          <div className="bg-white/80 backdrop-blur-xl p-10 rounded-[2rem] border border-white shadow-xl shadow-slate-200/20 flex flex-col justify-between group">
-            <div className="flex flex-col h-full">
+          <div className="bg-white/80 backdrop-blur-xl p-10 rounded-[2rem] border border-white shadow-xl shadow-slate-200/20 flex flex-col justify-between group relative overflow-hidden">
+            <BorderBeam colorFrom="#000" colorTo="#000" size={300} duration={15} delay={5} />
+            <div className="flex flex-col h-full relative z-10">
               <div className="flex items-start gap-5 mb-8">
                 <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 shadow-inner shrink-0">
                   <AlertCircle size={28} strokeWidth={2.5} />
