@@ -232,28 +232,99 @@ def rref() -> str:
 def txn_id(idx: int, d: date) -> str:
     return f"TXN{d.strftime('%Y%m%d')}{idx:03d}"
 
-def pick_time(d: date, slot: str | None = None) -> datetime:
-    """Pick a realistic time based on slot hint or random slot."""
-    slots = {
-        "early_morning": (6,  8,  10),
-        "morning":       (8,  11, 30),
-        "lunch":         (12, 14, 25),
-        "afternoon":     (14, 17, 15),
-        "evening":       (17, 20, 30),
-        "night":         (20, 23, 15),
-        "late_night":    (23, 23, 5),
-    }
+def pick_time(d: date, slot: str | None = None, narration: str = "") -> datetime:
+    """
+    Human-realistic timestamp generation.
+
+    Real people don't transact uniformly — they cluster around:
+      - 8:30-9:30  (morning commute / coffee)
+      - 13:00-14:00 (lunch break)
+      - 19:30-21:30 (dinner / evening shopping)
+      - 23:00-00:30 (late-night Swiggy / Netflix)
+
+    Weekend users wake up ~1-2h later and spend more in evenings.
+    Seconds and sub-second offsets are randomised to feel organic.
+    Slot hint overrides the default behaviour (used for life events).
+    """
+    is_weekend = d.weekday() >= 5
+    # Weekend: +90 min offset on all morning peaks
+    weekend_offset_min = 90 if is_weekend else 0
+
+    # ── Merchant-aware slot override ─────────────────────────────────────────
+    narr_up = narration.upper()
     if slot is None:
-        slot = random.choices(list(slots.keys()),
-                              weights=[s[2] for s in slots.values()])[0]
-    h_min, h_max, _ = slots[slot]
-    hour   = random.randint(h_min, h_max)
-    minute = random.randint(0, 59)
-    second = random.randint(0, 59)
-    return datetime(d.year, d.month, d.day, hour, minute, second, tzinfo=IST)
+        if any(k in narr_up for k in ("STARBUCKS", "CHAAYOS", "TIFFIN", "BREAKFAST", "COFFEE")):
+            slot = "morning_coffee"
+        elif any(k in narr_up for k in ("ZOMATO", "SWIGGY", "DOMINOS", "PIZZA", "LUNCH")):
+            slot = "meal" if not is_weekend else "late_meal"
+        elif any(k in narr_up for k in ("UBER", "OLA", "RAPIDO", "METRO", "IRCTC")):
+            slot = "commute"
+        elif any(k in narr_up for k in ("NETFLIX", "SPOTIFY", "HOTSTAR", "BOOKMYSHOW")):
+            slot = "evening_leisure"
+        elif any(k in narr_up for k in ("ATM", "CASH WDL")):
+            slot = "business_hours"
+        elif any(k in narr_up for k in ("SALARY", "NEFT CR", "SAL/")):
+            slot = "office_open"
+        elif any(k in narr_up for k in ("AMAZON", "FLIPKART", "MYNTRA")):
+            slot = "shopping_browse"
+
+    # ── Gaussian peak clusters (mean_hour, std_minutes) ──────────────────────
+    # Each slot has a list of (peak_hour, std_mins, weight) peaks
+    # We pick one peak probabilistically, then sample from its Gaussian.
+    PEAKS: dict[str, list[tuple[float, float, int]]] = {
+        "morning_coffee":   [(8.5,  25, 5),  (9.2,  20, 3)],
+        "meal":             [(13.0, 35, 6),  (20.0, 40, 4),  (12.0, 20, 2)],
+        "late_meal":        [(13.5, 45, 4),  (20.5, 50, 6),  (14.0, 30, 2)],
+        "commute":          [(8.8,  30, 5),  (18.5, 35, 5),  (9.5,  25, 2)],
+        "evening_leisure":  [(21.0, 45, 6),  (22.0, 40, 3),  (20.0, 30, 2)],
+        "business_hours":   [(11.0, 60, 4),  (15.0, 60, 4),  (10.0, 40, 2)],
+        "office_open":      [(9.0,  20, 8),  (10.0, 30, 3)],
+        "shopping_browse":  [(13.5, 60, 3),  (21.5, 60, 5),  (16.0, 45, 3)],
+        # Explicit slot hints (from life events)
+        "morning":          [(9.0,  40, 6),  (10.0, 30, 3)],
+        "lunch":            [(13.0, 30, 8),  (12.5, 20, 2)],
+        "afternoon":        [(15.5, 60, 6),  (16.5, 45, 2)],
+        "evening":          [(19.0, 45, 5),  (20.0, 40, 4)],
+        "night":            [(21.0, 50, 5),  (22.0, 40, 3),  (23.0, 30, 1)],
+        "late_night":       [(23.5, 30, 5),  (0.5,  25, 3)],
+        "early_morning":    [(7.0,  30, 6),  (7.5,  20, 3)],
+    }
+
+    peaks = PEAKS.get(slot or "", [(14.0, 90, 1)])  # broad afternoon default
+
+    # Pick a peak probabilistically
+    weights = [p[2] for p in peaks]
+    peak_h, std_m, _ = random.choices(peaks, weights=weights, k=1)[0]
+
+    # Weekend sleep-in on morning slots
+    if is_weekend and slot in ("morning_coffee", "morning", "commute", "office_open"):
+        peak_h += weekend_offset_min / 60
+
+    # Sample from Gaussian (minutes from midnight)
+    mean_mins = peak_h * 60
+    std_mins  = std_m
+    total_mins = -1
+    for _ in range(20):   # rejection sample to stay in [0, 1439]
+        total_mins = int(random.gauss(mean_mins, std_mins))
+        if 0 <= total_mins <= 1439:
+            break
+    total_mins = max(0, min(1439, total_mins))
+
+    hour   = total_mins // 60
+    minute = total_mins % 60
+    # Organic seconds: people tap at :00-:05 less often, more at :10-:50
+    second = int(random.gauss(30, 15))
+    second = max(1, min(58, second))
+    # Milliseconds: real UPI logs have actual ms
+    ms = random.randint(0, 999)
+
+    return datetime(d.year, d.month, d.day, hour, minute, second,
+                    microsecond=ms * 1000, tzinfo=IST)
+
 
 def fmt_ts(dt: datetime) -> str:
-    return dt.strftime("%Y-%m-%dT%H:%M:%S.000+05:30")
+    ms = dt.microsecond // 1000
+    return dt.strftime(f"%Y-%m-%dT%H:%M:%S.{ms:03d}+05:30")
 
 def fmt_bal(b: float) -> str:
     return f"{b:.2f}"
@@ -261,6 +332,149 @@ def fmt_bal(b: float) -> str:
 def pick_merchant(pool):
     weights = [m[4] for m in pool]
     return random.choices(pool, weights=weights, k=1)[0]
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EDGE CASE INJECTION
+# Produces one of each scenario the classifier must handle correctly.
+# Each scenario is labelled so it is easy to trace in test output.
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _mk(idx, d, narr, mode, amount, balance, ttype="DEBIT", hour=14, minute=0):
+    """Build a single raw ReBIT transaction dict."""
+    dt = datetime(d.year, d.month, d.day, hour, minute, random.randint(0, 59), tzinfo=IST)
+    if ttype == "DEBIT":
+        balance -= amount
+    else:
+        balance += amount
+    return {
+        "txnId":                f"EDGE{d.strftime('%Y%m%d')}{idx:03d}",
+        "type":                 ttype,
+        "mode":                 mode,
+        "amount":               fmt_bal(amount),
+        "currentBalance":       fmt_bal(balance),
+        "transactionTimestamp": fmt_ts(dt),
+        "valueDate":            d.isoformat(),
+        "narration":            narr,
+        "reference":            rref(),
+    }, balance
+
+
+def _inject_edge_cases(txns: list[dict], balance: float) -> list[dict]:
+    """
+    Injects targeted edge-case transactions into the transaction list.
+
+    Scenarios covered:
+      EC-01  Exact duplicate (same txnId — dedup must remove)
+      EC-02  Near-duplicate (same narr+amount within 30s — heuristic dedup)
+      EC-03  Split transaction (3 small Zomato orders within 90 min)
+      EC-04  Noisy / unreadable narration (fallback → Unknown)
+      EC-05  Midnight edge (23:58 → classified on correct date)
+      EC-06  ATM withdrawal (must be Cash Withdrawal, not Shopping)
+      EC-07  Refund credit (must be Refund, not Income)
+      EC-08  Large one-time outlier (z-score spike, Sony camera)
+      EC-09  Recurring subscription (3rd Netflix = should be tagged recurring)
+      EC-10  Ambiguous narration (HDFC TRANSFER — time-based fallback)
+      EC-11  Weekend late-night food order (tagged weekend + night + food)
+      EC-12  Salary-like large credit (monthly, NEFT)
+    """
+    extras: list[dict] = []
+    bal = balance
+
+    # EC-01: Exact duplicate — same txnId as an existing transaction
+    if txns:
+        original = txns[0].copy()
+        original["txnId"] = txns[0]["txnId"]  # deliberate collision
+        original["transactionTimestamp"] = "2026-03-05T11:30:00.000+05:30"
+        extras.append(original)
+        print("  [EC-01] Exact duplicate injected")
+
+    # EC-02: Near-duplicate — same narration + amount, 25 seconds apart
+    d = date(2026, 3, 8)
+    t1, bal = _mk(901, d, "UPI-ZOMATO INTERNET PVT-zomato@okaxis",
+                  "UPI", 349.00, bal, hour=13, minute=10)
+    t2 = t1.copy()
+    t2["txnId"] = "EDGE202603080902"
+    t2["transactionTimestamp"] = "2026-03-08T13:10:25.000+05:30"  # 25s later
+    extras += [t1, t2]
+    print("  [EC-02] Near-duplicate injected (25s gap, same amount+narration)")
+
+    # EC-03: Split transaction — 3 small Zomato orders within 90 min
+    d = date(2026, 3, 12)
+    for i, (h, m, amt) in enumerate([(12, 5, 180), (12, 45, 220), (13, 20, 150)], start=910):
+        t, bal = _mk(i, d, "UPI-ZOMATO INTERNET PVT-zomato@okaxis",
+                     "UPI", amt, bal, hour=h, minute=m)
+        extras.append(t)
+    print("  [EC-03] Split transaction injected (3x Zomato in 75 min)")
+
+    # EC-04: Noisy narration — should fall to Unknown / fallback
+    d = date(2026, 3, 15)
+    t, bal = _mk(920, d, "IMPS/4839201847/TRF/REF8827364/NA",
+                 "UPI", 500.00, bal, hour=16, minute=22)
+    extras.append(t)
+    print("  [EC-04] Noisy narration injected (fallback expected)")
+
+    # EC-05: Midnight edge — 23:58 on Mar 19 (must be dated Mar 19, not Mar 20)
+    d = date(2026, 3, 19)
+    t, bal = _mk(930, d, "UPI-BUNDL TECHNOLOGIES PVT-swiggy@icici",
+                 "UPI", 310.00, bal, hour=23, minute=58)
+    extras.append(t)
+    print("  [EC-05] Midnight edge injected (23:58, Food expected)")
+
+    # EC-06: ATM withdrawal — must NOT be classified as Shopping
+    d = date(2026, 3, 22)
+    t, bal = _mk(940, d, "ATM WDL-HDFC BANK ATM-ANDHERI WEST MUMBAI",
+                 "ATM", 3000.00, bal, hour=10, minute=15)
+    extras.append(t)
+    print("  [EC-06] ATM withdrawal injected (Cash Withdrawal expected)")
+
+    # EC-07: Refund credit — NOT salary, NOT income
+    d = date(2026, 3, 24)
+    t, bal = _mk(950, d, "UPI CR-AMAZON SELLER SERVICES-amazon@okaxis-REFUND/ORD#3849201",
+                 "UPI", 1299.00, bal, ttype="CREDIT", hour=11, minute=5)
+    extras.append(t)
+    print("  [EC-07] Refund credit injected (Refund/Cashback expected)")
+
+    # EC-08: Large outlier — Rs. 89,000 DSLR camera (z-score >> threshold)
+    d = date(2026, 2, 10)
+    t, bal = _mk(960, d,
+                 "NEFT DR-ICIC0000001-CANON INDIA PVT LTD-INV/CAMERA/EOS90D/FEB2026",
+                 "NETBANKING", 89000.00, bal, hour=15, minute=30)
+    extras.append(t)
+    print("  [EC-08] Large outlier injected (Rs.89,000 camera — outlier expected)")
+
+    # EC-09: Third Netflix charge — should be tagged 'recurring'
+    for d_val, h in [(date(2026, 1, 18), 9), (date(2026, 2, 18), 9), (date(2026, 3, 18), 9)]:
+        t, bal = _mk(970, d_val, "UPI-NETFLIX INDIA-netflix@okaxis",
+                     "UPI", 649.00, bal, hour=h, minute=0)
+        t["txnId"] = f"EDGE_NFLX_{d_val.strftime('%Y%m%d')}"
+        extras.append(t)
+    print("  [EC-09] Recurring Netflix (3x monthly) injected")
+
+    # EC-10: Ambiguous narration — generic HDFC transfer, time-based inference
+    d = date(2026, 4, 2)
+    t, bal = _mk(980, d, "IMPS/HDFC0001234/TRANSFER/MISC/PERSONAL",
+                 "NETBANKING", 2000.00, bal, hour=20, minute=30)
+    extras.append(t)
+    print("  [EC-10] Ambiguous IMPS transfer injected (time-inference expected)")
+
+    # EC-11: Weekend late-night Swiggy (Sat 11:45 PM)
+    d = date(2026, 4, 4)   # Saturday
+    t, bal = _mk(990, d, "UPI-BUNDL TECHNOLOGIES PVT-swiggy@icici",
+                 "UPI", 425.00, bal, hour=23, minute=45)
+    extras.append(t)
+    print("  [EC-11] Weekend late-night food injected (weekend+night+food tags expected)")
+
+    # EC-12: Extra salary-like credit for March (already have one; this tests multi-month)
+    d = date(2026, 4, 30)
+    t, bal = _mk(999, d,
+                 "NEFT CR-SBIN0001234-TECHCORP SOLUTIONS LTD-SAL/APR2026/EMP00472",
+                 "NETBANKING", SALARY, bal, ttype="CREDIT", hour=9, minute=0)
+    extras.append(t)
+    print("  [EC-12] April salary credit injected")
+
+    print(f"  Total edge-case txns injected: {len(extras)}")
+    return txns + extras
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # BUILD
@@ -303,7 +517,7 @@ def build_transactions() -> list[dict]:
                 else:
                     slot = None
 
-                dt = pick_time(day, slot)
+                dt = pick_time(day, slot, narr)
                 ref = rref()
                 day_txns.append({
                     "txnId":                txn_id(idx, day),
@@ -337,8 +551,10 @@ def build_transactions() -> list[dict]:
 
         pool = EVERYDAY + (WEEKEND_EXTRA if is_weekend else [])
 
-        # Sort times so chronological
-        times = sorted([pick_time(day) for _ in range(n)])
+        # Pick merchant-aware times for each random transaction today
+        times = sorted([
+            pick_time(day, narration=pick_merchant(pool)[0]) for _ in range(n)
+        ])
 
         for dt in times:
             narr_tmpl, mode, mn, mx, _ = pick_merchant(pool)
@@ -365,6 +581,10 @@ def build_transactions() -> list[dict]:
         day_txns.sort(key=lambda t: t["transactionTimestamp"])
         txns.extend(day_txns)
         day += timedelta(days=1)
+
+    # Inject edge cases then re-sort whole list by timestamp
+    txns = _inject_edge_cases(txns, balance)
+    txns.sort(key=lambda t: t["transactionTimestamp"])
 
     return txns
 
@@ -426,5 +646,8 @@ if __name__ == "__main__":
     print()
     print("Life events included:")
     for d in sorted(LIFE_EVENTS.keys()):
-        labels = [e[0].split("/")[1] for e in LIFE_EVENTS[d]]
+        def _label(narr):
+            parts = narr.split("-")
+            return parts[1].split()[0] if len(parts) >= 2 else narr[:12]
+        labels = [_label(e[0]) for e in LIFE_EVENTS[d]]
         print(f"  {d}  {', '.join(labels)}")

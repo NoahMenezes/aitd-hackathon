@@ -18,6 +18,7 @@ from routes.consent import router as consent_router
 from routes.webhook import router as webhook_router
 from routes.transactions import router as transactions_router
 from routes.analytics import router as analytics_router
+from routes.onboarding import router as onboarding_router
 
 # ──────────────────────────────────────────────
 # Logging configuration
@@ -60,6 +61,7 @@ app.include_router(consent_router)
 app.include_router(webhook_router)
 app.include_router(transactions_router)
 app.include_router(analytics_router)
+app.include_router(onboarding_router)
 
 # ──────────────────────────────────────────────
 # WebSocket — real-time insights feed

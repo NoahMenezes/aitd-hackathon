@@ -1,14 +1,23 @@
 """
 SandInsight - Financial Insights Engine
 
-Categorizes transactions, detects overspending patterns,
-and generates actionable financial recommendations.
+Uses classifier output (category + confidence) from the classification
+pipeline instead of raw keyword matching, and enriches insights with
+anomaly detection (outliers, recurring patterns, weekend ratio).
 """
 
 import logging
 from typing import Any
 
+from services.anomaly import (
+    detect_outliers,
+    detect_recurring,
+    detect_salary_pattern,
+    weekend_spending_ratio,
+)
+
 logger = logging.getLogger("sandinsight.insights")
+
 
 # ──────────────────────────────────────────────
 # Category definitions: keyword → category
@@ -92,22 +101,29 @@ def generate_insights(transactions: list[dict[str, Any]]) -> dict[str, Any]:
     total_credit = 0.0
 
     for txn in transactions:
-        narration = txn.get("narration", "")
-        amount = txn.get("amount", 0.0)
+        amount   = txn.get("amount", 0.0)
         txn_type = txn.get("type", "DEBIT")
+
+        # Use classifier output if available, else fall back to old keyword method
+        clf = txn.get("classification", {})
+        category = clf.get("category") if clf else None
+        if not category:
+            category = categorize_transaction(txn.get("narration", ""))
+
+        # Skip low-confidence Unknown classifications for budget tracking
+        conf = clf.get("confidence", 1.0) if clf else 1.0
 
         if txn_type == "CREDIT":
             total_credit += amount
             continue
 
         total_debit += amount
-        category = categorize_transaction(narration)
 
-        category_totals[category] = category_totals.get(category, 0.0) + amount
-        category_counts[category] = category_counts.get(category, 0) + 1
+        if category != "Unknown" or conf >= 0.5:
+            category_totals[category] = category_totals.get(category, 0.0) + amount
+            category_counts[category] = category_counts.get(category, 0) + 1
 
-        # Extract merchant name from narration (UPI/MERCHANT/...)
-        merchant = _extract_merchant(narration)
+        merchant = _extract_merchant(txn.get("narration", ""))
         if merchant:
             merchant_totals[merchant] = merchant_totals.get(merchant, 0.0) + amount
 
@@ -188,21 +204,60 @@ def generate_insights(transactions: list[dict[str, Any]]) -> dict[str, Any]:
         len(insights), len(recommendations),
     )
 
+    # ── 6. Anomaly & behavioral enrichment ───────
+    outliers       = detect_outliers(transactions)
+    recurring      = detect_recurring(transactions)
+    salary_events  = detect_salary_pattern(transactions)
+    weekend_ratio  = weekend_spending_ratio(transactions)
+
+    for o in outliers[:2]:   # surface top 2 outliers as insights
+        insights.append(
+            f"⚡ Unusually large transaction: Rs.{o['amount']:,.0f} on {o['date']} "
+            f"({o['z_score']}x above normal)"
+        )
+
+    if recurring:
+        insights.append(
+            f"🔁 {len(recurring)} recurring payment pattern(s) detected "
+            f"(e.g. {recurring[0]['merchant'][:20]} — {recurring[0]['pattern']})"
+        )
+
+    if weekend_ratio["weekend_pct"] > 40:
+        insights.append(
+            f"📅 {weekend_ratio['weekend_pct']}% of spending happens on weekends "
+            f"(Rs.{weekend_ratio['weekend_total']:,.0f})"
+        )
+        recommendations.append(
+            "Plan weekend budgets in advance to avoid impulse overspending."
+        )
+
     return {
         "category_totals": {k: round(v, 2) for k, v in category_totals.items()},
-        "budget_status": budget_status,
-        "insights": insights,
+        "budget_status":   budget_status,
+        "insights":        insights,
         "recommendations": recommendations,
-        "top_merchants": top_merchants,
-        "summary": summary,
+        "top_merchants":   top_merchants,
+        "summary":         summary,
+        "anomalies": {
+            "outliers":       outliers[:5],
+            "recurring":      recurring[:5],
+            "salary_events":  salary_events,
+            "weekend_ratio":  weekend_ratio,
+        },
     }
 
 
 def _extract_merchant(narration: str) -> str:
-    """Extract merchant name from a UPI-style narration string."""
+    """Extract merchant name from narration (handles both UPI- and UPI/ formats)."""
+    # New format: UPI-MERCHANT NAME-vpa@bank
+    if "-" in narration:
+        parts = narration.split("-", 2)
+        if len(parts) >= 2:
+            return parts[1].strip().upper()[:20]
+    # Legacy format: UPI/MERCHANT/...
     parts = narration.split("/")
     if len(parts) >= 2:
-        return parts[1].strip().upper()
+        return parts[1].strip().upper()[:20]
     return ""
 
 
