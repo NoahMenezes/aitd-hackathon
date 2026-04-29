@@ -2,9 +2,6 @@ export const translations = {
   en: {
     navbar: {
       home: "Home",
-      pricing: "Pricing",
-      about: "About",
-      contact: "Contact",
       getStarted: "Start Simulation",
     },
     hero: {
@@ -33,13 +30,21 @@ export const translations = {
         { title: "Future Prediction", description: "Visualize your financial state months in advance with our advanced prediction engine." },
       ],
     },
+    faqs: {
+      title: "Frequently Asked Questions",
+      description: "Discover quick and comprehensive answers to common questions about our platform, services, and features.",
+      items: [
+        { id: "faq-1", question: "How does FinPilot predict my future wealth?", answer: "Our engine uses historical pattern analysis and real-time data to simulate high-probability financial outcomes." },
+        { id: "faq-2", question: "Is my financial data secure?", answer: "Yes, we prioritize your security with bank-level encryption and secure, anonymized data pipelines." },
+        { id: "faq-3", question: "Can I simulate specific habit changes?", answer: "Absolutely. You can see the long-term impact of decisions like 'eating out less' or 'investing more'." },
+        { id: "faq-4", question: "Which currencies are supported?", answer: "We currently support USD and INR, with full internationalization for other major currencies coming soon." },
+        { id: "faq-5", question: "Are the recommendations automated?", answer: "Yes, our AI ranks recommendations based on your unique financial profile to provide the most impactful guidance." },
+      ],
+    },
   },
   hi: {
     navbar: {
       home: "मुख्य पृष्ठ",
-      pricing: "कीमतें",
-      about: "हमारे बारे में",
-      contact: "संपर्क करें",
       getStarted: "सिमुलेशन शुरू करें",
     },
     hero: {
@@ -66,6 +71,17 @@ export const translations = {
         { title: "परिदृश्य सिमुलेशन", description: "दैनिक विकल्पों के प्रभाव की भविष्यवाणी करें। यदि आप X करते हैं, तो आपका भविष्य का धन Y हो जाता है।" },
         { title: "स्मार्ट सिफारिशें", description: "एआई अंतर्दृष्टि के आधार पर अपने वित्तीय स्वास्थ्य को बेहतर बनाने के लिए रैंक की गई, कार्रवाई योग्य सलाह प्राप्त करें।" },
         { title: "भविष्य की भविष्यवाणी", description: "हमारे उन्नत भविष्यवाणी इंजन के साथ महीनों पहले अपनी वित्तीय स्थिति की कल्पना करें।" },
+      ],
+    },
+    faqs: {
+      title: "अक्सर पूछे जाने वाले प्रश्न",
+      description: "हमारे प्लेटफॉर्म, सेवाओं और सुविधाओं के बारे में सामान्य प्रश्नों के त्वरित और व्यापक उत्तर खोजें।",
+      items: [
+        { id: "faq-1", question: "FinPilot मेरे भविष्य के धन की भविष्यवाणी कैसे करता है?", answer: "हमारा इंजन उच्च-संभावना वाले वित्तीय परिणामों का सिमुलेशन करने के लिए ऐतिहासिक पैटर्न विश्लेषण और वास्तविक समय के डेटा का उपयोग करता है।" },
+        { id: "faq-2", question: "क्या मेरा वित्तीय डेटा सुरक्षित है?", answer: "हाँ, हम बैंक-स्तरीय एन्क्रिप्शन और सुरक्षित, अनाम डेटा पाइपलाइनों के साथ आपकी सुरक्षा को प्राथमिकता देते हैं।" },
+        { id: "faq-3", question: "क्या मैं विशिष्ट आदतों के बदलाव का सिमुलेशन कर सकता हूँ?", answer: "बिल्कुल। आप 'बाहर कम खाना' या 'अधिक निवेश करना' जैसे निर्णयों का दीर्घकालिक प्रभाव देख सकते हैं।" },
+        { id: "faq-4", question: "कौन सी मुद्राएं समर्थित हैं?", answer: "हम वर्तमान में USD और INR का समर्थन करते हैं, अन्य प्रमुख मुद्राओं के लिए अंतरराष्ट्रीयकरण जल्द ही आ रहा है।" },
+        { id: "faq-5", question: "क्या सिफारिशें स्वचालित हैं?", answer: "हाँ, हमारा एआई सबसे प्रभावशाली मार्गदर्शन प्रदान करने के लिए आपके अद्वितीय वित्तीय प्रोफाइल के आधार पर सिफारिशों को रैंक करता है।" },
       ],
     },
   },

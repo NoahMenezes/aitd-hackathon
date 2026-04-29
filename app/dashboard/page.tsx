@@ -11,35 +11,27 @@ import data from "./data.json"
 
 export default function Page() {
   return (
-    <div className="bg-white min-h-screen flex flex-col relative z-20">
+    <div className="min-h-screen flex flex-col relative z-20">
       <Navbar />
       <main className="flex-1 flex items-center justify-center p-4 md:p-8 lg:p-12">
-        <div className="w-full max-w-7xl h-[85vh] bg-background border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+        <div 
+          className="w-full max-w-7xl h-[85vh] rounded-3xl overflow-hidden flex flex-col bg-background shadow-[0_32px_120px_-10px_rgba(0,0,0,0.12)] border border-border"
+        >
           <TooltipProvider delayDuration={0}>
-            <SidebarProvider
-              style={
-                {
-                  "--sidebar-width": "calc(var(--spacing) * 48)",
-                  "--header-height": "calc(var(--spacing) * 12)",
-                } as React.CSSProperties
-              }
-            >
-              <AppSidebar variant="inset" className="bg-transparent" />
-              <SidebarInset className="bg-transparent overflow-hidden">
-                <SiteHeader />
-                <div className="flex flex-1 flex-col overflow-auto bg-transparent">
-                  <div className="@container/main flex flex-1 flex-col gap-2 bg-transparent">
-                    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 bg-transparent">
-                      <SectionCards />
-                      <div className="px-4 lg:px-6">
-                        <ChartAreaInteractive />
-                      </div>
-                      <DataTable data={data} />
+            <div className="flex flex-1 flex-col overflow-auto bg-background">
+              <SiteHeader />
+              <div className="flex flex-1 flex-col overflow-auto">
+                <div className="@container/main flex flex-1 flex-col gap-2">
+                  <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 max-w-6xl mx-auto w-full">
+                    <SectionCards />
+                    <div className="px-4 lg:px-6">
+                      <ChartAreaInteractive />
                     </div>
+                    <DataTable data={data} />
                   </div>
                 </div>
-              </SidebarInset>
-            </SidebarProvider>
+              </div>
+            </div>
           </TooltipProvider>
         </div>
       </main>

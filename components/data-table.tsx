@@ -313,14 +313,14 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
       data-state={row.getIsSelected() && "selected"}
       data-dragging={isDragging}
       ref={setNodeRef}
-      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
+      className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80 border-b border-border/30 hover:bg-white/20 transition-colors"
       style={{
         transform: CSS.Transform.toString(transform),
         transition: transition,
       }}
     >
       {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
+        <TableCell key={cell.id} className="py-4 text-[13px]">
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </TableCell>
       ))}
@@ -473,7 +473,7 @@ export function DataTable({
         value="outline"
         className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
       >
-        <div className="overflow-hidden rounded-lg border">
+        <div className="overflow-hidden">
           <DndContext
             collisionDetection={closestCenter}
             modifiers={[restrictToVerticalAxis]}
@@ -482,12 +482,12 @@ export function DataTable({
             id={sortableId}
           >
             <Table>
-              <TableHeader className="sticky top-0 z-10 bg-muted">
+              <TableHeader className="sticky top-0 z-10 bg-transparent border-b border-border/50">
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                  <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} colSpan={header.colSpan}>
+                        <TableHead key={header.id} colSpan={header.colSpan} className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground py-3">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -657,10 +657,10 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
           {item.header}
         </Button>
       </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="gap-1">
-          <DrawerTitle>{item.header}</DrawerTitle>
-          <DrawerDescription>
+      <DrawerContent className="bg-background">
+        <DrawerHeader className="gap-1 border-b border-border mb-6">
+          <DrawerTitle className="text-3xl font-display font-semibold tracking-tight">{item.header}</DrawerTitle>
+          <DrawerDescription className="text-sm font-medium text-muted-foreground pb-2">
             Showing total visitors for the last 6 months
           </DrawerDescription>
         </DrawerHeader>
@@ -722,44 +722,36 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               <Separator />
             </>
           )}
-          <form className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="header">Header</Label>
-              <Input id="header" defaultValue={item.header} />
+          <form className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="header" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Header</Label>
+              <Input id="header" defaultValue={item.header} className="bg-muted/30 border-border focus:bg-background transition-colors" />
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="type">Type</Label>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="type" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Type</Label>
                 <Select defaultValue={item.type}>
-                  <SelectTrigger id="type" className="w-full">
+                  <SelectTrigger id="type" className="w-full bg-muted/30 border-border">
                     <SelectValue placeholder="Select a type" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="Table of Contents">
-                        Table of Contents
-                      </SelectItem>
-                      <SelectItem value="Executive Summary">
-                        Executive Summary
-                      </SelectItem>
-                      <SelectItem value="Technical Approach">
-                        Technical Approach
-                      </SelectItem>
+                      <SelectItem value="Table of Contents">Table of Contents</SelectItem>
+                      <SelectItem value="Executive Summary">Executive Summary</SelectItem>
+                      <SelectItem value="Technical Approach">Technical Approach</SelectItem>
                       <SelectItem value="Design">Design</SelectItem>
                       <SelectItem value="Capabilities">Capabilities</SelectItem>
-                      <SelectItem value="Focus Documents">
-                        Focus Documents
-                      </SelectItem>
+                      <SelectItem value="Focus Documents">Focus Documents</SelectItem>
                       <SelectItem value="Narrative">Narrative</SelectItem>
                       <SelectItem value="Cover Page">Cover Page</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="status">Status</Label>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="status" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Status</Label>
                 <Select defaultValue={item.status}>
-                  <SelectTrigger id="status" className="w-full">
+                  <SelectTrigger id="status" className="w-full bg-muted/30 border-border">
                     <SelectValue placeholder="Select a status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -773,27 +765,25 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="target">Target</Label>
-                <Input id="target" defaultValue={item.target} />
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="target" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Target</Label>
+                <Input id="target" defaultValue={item.target} className="bg-muted/30 border-border" />
               </div>
-              <div className="flex flex-col gap-3">
-                <Label htmlFor="limit">Limit</Label>
-                <Input id="limit" defaultValue={item.limit} />
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="limit" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Limit</Label>
+                <Input id="limit" defaultValue={item.limit} className="bg-muted/30 border-border" />
               </div>
             </div>
-            <div className="flex flex-col gap-3">
-              <Label htmlFor="reviewer">Reviewer</Label>
+            <div className="flex flex-col gap-2 pb-12">
+              <Label htmlFor="reviewer" className="text-xs uppercase tracking-widest font-bold text-muted-foreground">Reviewer</Label>
               <Select defaultValue={item.reviewer}>
-                <SelectTrigger id="reviewer" className="w-full">
+                <SelectTrigger id="reviewer" className="w-full bg-muted/30 border-border">
                   <SelectValue placeholder="Select a reviewer" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                    <SelectItem value="Jamik Tashpulatov">
-                      Jamik Tashpulatov
-                    </SelectItem>
+                    <SelectItem value="Jamik Tashpulatov">Jamik Tashpulatov</SelectItem>
                     <SelectItem value="Emily Whalen">Emily Whalen</SelectItem>
                   </SelectGroup>
                 </SelectContent>

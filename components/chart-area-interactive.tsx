@@ -165,14 +165,14 @@ export function ChartAreaInteractive() {
   })
 
   return (
-    <Card className="@container/card">
+    <Card className="@container/card bg-white/40 border-white/50 shadow-sm backdrop-blur-sm">
       <CardHeader>
-        <CardTitle>Total Visitors</CardTitle>
+        <CardTitle className="font-display font-semibold">Total Visitors</CardTitle>
         <CardDescription>
-          <span className="hidden @[540px]/card:block">
+          <span className="hidden @[540px]/card:block text-xs uppercase tracking-wider font-semibold">
             Total for the last 3 months
           </span>
-          <span className="@[540px]/card:hidden">Last 3 months</span>
+          <span className="@[540px]/card:hidden text-xs uppercase tracking-wider font-semibold">Last 3 months</span>
         </CardDescription>
         <CardAction>
           <ToggleGroup
