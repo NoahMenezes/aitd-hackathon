@@ -32,8 +32,8 @@ export const Dashboard = () => {
         {/* Top Bar */}
         <div className="h-12 border-b border-border/50 flex items-center justify-between px-4 bg-white/50">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-foreground rounded flex items-center justify-center text-white text-[10px] font-bold">N</div>
-            <span className="text-[11px] font-semibold">Nexora</span>
+            <div className="w-6 h-6 bg-foreground rounded flex items-center justify-center text-white text-[10px] font-bold">F</div>
+            <span className="text-[11px] font-semibold">FinPilot</span>
             <ChevronDown size={10} className="text-muted-foreground" />
           </div>
           
