@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useDashboard } from "@/lib/DashboardContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import {
@@ -13,50 +13,43 @@ import {
   Truck,
   Calendar,
   MoreHorizontal,
+  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+
+type Timeframe = "yearly" | "monthly" | "weekly";
 
 export default function InsightsPage() {
   const { foodSpend } = useDashboard();
   const { t } = useLanguage();
+  const [timeframe, setTimeframe] = useState<Timeframe>("monthly");
 
-  const categories = [
-    {
-      name: "Food & Dining",
-      amount: foodSpend,
-      color: "bg-black",
-      icon: <ShoppingBag size={14} />,
-      percentage: "35%",
-    },
-    {
-      name: "Shopping",
-      amount: 4900,
-      color: "bg-slate-600",
-      icon: <ShoppingBag size={14} />,
-      percentage: "22%",
-    },
-    {
-      name: "Transport",
-      amount: 2800,
-      color: "bg-slate-400",
-      icon: <Truck size={14} />,
-      percentage: "12%",
-    },
-    {
-      name: "Subscriptions",
-      amount: 2100,
-      color: "bg-slate-300",
-      icon: <Calendar size={14} />,
-      percentage: "8%",
-    },
-    {
-      name: "Others",
-      amount: 1400,
-      color: "bg-slate-200",
-      icon: <MoreHorizontal size={14} />,
-      percentage: "5%",
-    },
-  ];
+  const dataMap = {
+    monthly: [
+      { name: "Food & Dining", amount: foodSpend, color: "bg-black", icon: <ShoppingBag size={14} />, percentage: "35%" },
+      { name: "Shopping", amount: 4900, color: "bg-slate-600", icon: <ShoppingBag size={14} />, percentage: "22%" },
+      { name: "Transport", amount: 2800, color: "bg-slate-400", icon: <Truck size={14} />, percentage: "12%" },
+      { name: "Subscriptions", amount: 2100, color: "bg-slate-300", icon: <Calendar size={14} />, percentage: "8%" },
+      { name: "Others", amount: 1400, color: "bg-slate-200", icon: <MoreHorizontal size={14} />, percentage: "5%" },
+    ],
+    yearly: [
+      { name: "Food & Dining", amount: foodSpend * 12, color: "bg-black", icon: <ShoppingBag size={14} />, percentage: "38%" },
+      { name: "Shopping", amount: 58000, color: "bg-slate-600", icon: <ShoppingBag size={14} />, percentage: "20%" },
+      { name: "Transport", amount: 33600, color: "bg-slate-400", icon: <Truck size={14} />, percentage: "11%" },
+      { name: "Subscriptions", amount: 25200, color: "bg-slate-300", icon: <Calendar size={14} />, percentage: "9%" },
+      { name: "Others", amount: 16800, color: "bg-slate-200", icon: <MoreHorizontal size={14} />, percentage: "6%" },
+    ],
+    weekly: [
+      { name: "Food & Dining", amount: Math.round(foodSpend / 4), color: "bg-black", icon: <ShoppingBag size={14} />, percentage: "32%" },
+      { name: "Shopping", amount: 1225, color: "bg-slate-600", icon: <ShoppingBag size={14} />, percentage: "24%" },
+      { name: "Transport", amount: 700, color: "bg-slate-400", icon: <Truck size={14} />, percentage: "13%" },
+      { name: "Subscriptions", amount: 525, color: "bg-slate-300", icon: <Calendar size={14} />, percentage: "7%" },
+      { name: "Others", amount: 350, color: "bg-slate-200", icon: <MoreHorizontal size={14} />, percentage: "4%" },
+    ],
+  };
+
+  const timeframeData = dataMap[timeframe];
 
   const insights = [
     {
@@ -102,54 +95,74 @@ export default function InsightsPage() {
           {/* Main Chart Card */}
           <div className="lg:col-span-8">
             <div className="bg-white p-10 border border-border shadow-sm border-beam">
-              <div className="flex items-center justify-between mb-12">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-16 pb-12 border-b border-slate-50">
                 <div>
-                  <h3 className="text-2xl font-black text-black tracking-tighter mb-2 uppercase tracking-widest">
+                  <h3 className="text-[11px] font-black text-slate-400 tracking-[0.3em] uppercase mb-4">
                     {t.dashboard.insights.allocation}
                   </h3>
-                  <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em]">
-                    {t.dashboard.insights.distribution}
-                  </p>
+                  <div className="relative inline-block group">
+                    <select
+                      value={timeframe}
+                      onChange={(e) => setTimeframe(e.target.value as Timeframe)}
+                      className="appearance-none bg-black text-white font-black text-sm uppercase tracking-[0.2em] px-8 py-4 pr-14 hover:bg-slate-900 transition-all cursor-pointer focus:outline-none border-none shadow-xl"
+                    >
+                      <option value="yearly">Yearly View</option>
+                      <option value="monthly">Monthly View</option>
+                      <option value="weekly">Weekly View</option>
+                    </select>
+                    <ChevronDown size={16} className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-white transition-colors" />
+                  </div>
                 </div>
-                <div className="w-12 h-12 border border-black flex items-center justify-center text-black">
-                  <TrendingUp size={24} />
+
+                <div className="text-left md:text-right">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">
+                    Total Spending
+                  </p>
+                  <h2 className="text-6xl font-black text-black tracking-tighter">
+                    ₹{timeframeData.reduce((acc, cat) => acc + cat.amount, 0).toLocaleString("en-IN")}
+                  </h2>
                 </div>
               </div>
 
-              <div className="space-y-8">
-                {categories.map((cat) => (
-                  <div key={cat.name} className="group/item">
-                    <div className="flex justify-between items-end mb-3">
-                      <div className="flex items-center gap-4">
+              <div className="border-t border-black mt-8">
+                {timeframeData.map((cat) => (
+                  <div key={cat.name} className="group/item py-8 px-10 border-b border-x border-black bg-white transition-all duration-300 hover:bg-slate-50 hover:scale-[1.01] hover:z-10 relative">
+                    <div className="grid grid-cols-1 md:grid-cols-3 items-center gap-8">
+                      {/* Category Label */}
+                      <div className="flex items-center gap-6">
                         <div
                           className={cn(
-                            "w-8 h-8 flex items-center justify-center text-white transition-transform group-hover/item:scale-110",
+                            "w-14 h-14 flex items-center justify-center text-white transition-transform group-hover/item:scale-110 shadow-lg",
                             cat.color,
                           )}
                         >
                           {cat.icon}
                         </div>
                         <div>
-                          <span className="text-sm font-black text-black uppercase tracking-widest">
+                          <p className="text-sm font-black text-black uppercase tracking-widest mb-2">
                             {cat.name}
-                          </span>
-                          <span className="ml-3 text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 border border-slate-100 px-2 py-0.5">
+                          </p>
+                          <span className="text-[12px] font-black text-slate-500 uppercase tracking-widest bg-slate-100 border border-slate-200 px-3 py-1 rounded-sm">
                             {cat.percentage}
                           </span>
                         </div>
                       </div>
-                      <span className="text-lg font-black text-black tracking-tighter">
-                        ₹{cat.amount.toLocaleString("en-IN")}
-                      </span>
-                    </div>
-                    <div className="h-1 bg-slate-100 border border-slate-200">
-                      <div
-                        className={cn(
-                          "h-full transition-all duration-1000 ease-out",
-                          cat.color,
-                        )}
-                        style={{ width: cat.percentage }}
-                      />
+                      
+                      {/* Centered Amount */}
+                      <div className="text-center">
+                        <span className="text-3xl font-black text-black tracking-tighter">
+                          ₹{cat.amount.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                      
+                      {/* Right Aligned Button */}
+                      <div className="flex justify-end">
+                        <Link href="/dashboard/simulation">
+                          <button className="px-8 py-3 bg-black text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-slate-900 transition-all flex items-center gap-3 shadow-xl hover:shadow-2xl active:scale-95">
+                            Simulate <TrendingUp size={14} />
+                          </button>
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 ))}
