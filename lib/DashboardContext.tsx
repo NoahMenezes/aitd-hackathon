@@ -12,6 +12,18 @@ interface Transaction {
   reference: string;
 }
 
+export type PlanKey = "easy" | "moderate" | "hard";
+
+export interface SelectedPlan {
+  key: PlanKey;
+  label: string;
+  steps: string[];
+  yearlySavings: number;
+  feasibility: string;
+  effort: PlanKey;
+  startedAt: string;
+}
+
 interface DashboardContextType {
   isLinked: boolean;
   setIsLinked: (val: boolean) => void;
@@ -22,6 +34,12 @@ interface DashboardContextType {
   foodSpend: number;
   setFoodSpend: (val: number) => void;
   handlePurchase: (merchant: string, amount: number, category: string) => void;
+  isChatOpen: boolean;
+  setIsChatOpen: (val: boolean) => void;
+  chatMessages: { role: "user" | "bot"; content: string }[];
+  setChatMessages: (val: { role: "user" | "bot"; content: string }[]) => void;
+  selectedPlan: SelectedPlan | null;
+  setSelectedPlan: (plan: SelectedPlan | null) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -30,7 +48,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [isLinked, setIsLinked] = useState(false);
   const [balance, setBalance] = useState(52450);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [foodSpend, setFoodSpend] = useState(7500); // Initializing with HTML value for demo
+  const [foodSpend, setFoodSpend] = useState(7500);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "bot"; content: string }[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<SelectedPlan | null>(null);
 
   const handlePurchase = (merchant: string, amount: number, category: string) => {
     const newBalance = balance - amount;
@@ -58,7 +79,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       balance, setBalance,
       transactions, setTransactions,
       foodSpend, setFoodSpend,
-      handlePurchase
+      handlePurchase,
+      isChatOpen, setIsChatOpen,
+      chatMessages, setChatMessages,
+      selectedPlan, setSelectedPlan,
     }}>
       {children}
     </DashboardContext.Provider>

@@ -63,16 +63,6 @@ export const Navbar = () => {
             {t.navbar.insights}
           </Link>
           <Link
-            href="/dashboard/simulation"
-            className={`text-[11px] font-black px-5 py-2 transition-all duration-500 uppercase tracking-widest ${
-              isSimulation
-                ? "bg-black text-white"
-                : "text-slate-400 hover:text-black hover:bg-white"
-            }`}
-          >
-            {t.navbar.simulation}
-          </Link>
-          <Link
             href="/dashboard/recommendations"
             className={`text-[11px] font-black px-5 py-2 transition-all duration-500 uppercase tracking-widest ${
               isRecommendations
@@ -81,6 +71,16 @@ export const Navbar = () => {
             }`}
           >
             {t.navbar.recommendations}
+          </Link>
+          <Link
+            href="/dashboard/simulation"
+            className={`text-[11px] font-black px-5 py-2 transition-all duration-500 uppercase tracking-widest ${
+              isSimulation
+                ? "bg-black text-white"
+                : "text-slate-400 hover:text-black hover:bg-white"
+            }`}
+          >
+            {t.navbar.simulation}
           </Link>
         </div>
 
