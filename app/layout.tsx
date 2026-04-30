@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/LanguageContext";
-import { BackgroundVideo } from "@/components/BackgroundVideo";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ClientToaster } from "@/components/ClientToaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,13 +32,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col relative bg-white transition-colors duration-300">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-          enableColorScheme={false}
-        >
+        <ThemeProvider>
           <LanguageProvider>
             {/* Global Background Image */}
             <div className="fixed inset-0 w-full h-full -z-50 pointer-events-none">
@@ -50,6 +44,7 @@ export default function RootLayout({
               <div className="absolute inset-0 bg-white/5" />
             </div>
             {children}
+            <ClientToaster />
           </LanguageProvider>
         </ThemeProvider>
       </body>

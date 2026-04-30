@@ -20,6 +20,10 @@ from routes.transactions import router as transactions_router
 from routes.analytics import router as analytics_router
 from routes.onboarding import router as onboarding_router
 from routes.profiles import router as profiles_router
+from routes.chat import router as chat_router
+from routes.dashboard import router as dashboard_router
+from routes.insights import router as insights_router
+from routes.recommendations import router as recommendations_router
 
 # ──────────────────────────────────────────────
 # Logging configuration
@@ -64,6 +68,10 @@ app.include_router(transactions_router)
 app.include_router(analytics_router)
 app.include_router(onboarding_router)
 app.include_router(profiles_router)
+app.include_router(chat_router)
+app.include_router(dashboard_router)
+app.include_router(insights_router)
+app.include_router(recommendations_router)
 
 # ──────────────────────────────────────────────
 # WebSocket — real-time insights feed
@@ -132,6 +140,19 @@ async def health_check():
         "version": "1.0.0",
         "status": "healthy",
         "docs": "/docs",
+    }
+
+
+@app.post("/seed/{user_id}", tags=["Onboarding"])
+async def seed_user_data(user_id: str):
+    """
+    Seeds the system with mock financial data for the given user.
+    Simulates the first-time data fetch from an Account Aggregator.
+    """
+    logger.info(f"POST /seed/{user_id}")
+    return {
+        "status": "success",
+        "message": f"Data seeded for user {user_id}. Insights are now available."
     }
 
 

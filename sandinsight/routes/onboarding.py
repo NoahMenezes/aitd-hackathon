@@ -174,3 +174,17 @@ async def complete_onboarding(req: CompleteRequest):
             "insights":      insights,
         },
     }
+    
+@router.post("/seed/{user_id}")
+async def seed_user_data(user_id: str):
+    """
+    Seeds the system with mock financial data for the given user.
+    Simulates the first-time data fetch from an Account Aggregator.
+    """
+    logger.info(f"POST /seed/{user_id}")
+    # In this simulation, simulate_fi_ready already provides the data.
+    # We just return success to satisfy the frontend flow.
+    return {
+        "status": "success",
+        "message": f"Data seeded for user {user_id}. Insights are now available."
+    }

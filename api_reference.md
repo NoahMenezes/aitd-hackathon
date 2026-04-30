@@ -166,3 +166,4 @@ WS   /ws/insights                   Real-time feed
 ```
 
 **Total: 16 HTTP endpoints + 1 WebSocket**
++

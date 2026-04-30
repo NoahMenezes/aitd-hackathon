@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { ShoppingBag, Star, Clock, MapPin, Search } from 'lucide-react';
+import { apiFetch } from '@/lib/api';
+import { getUserId } from '@/lib/auth';
 
 export const MerchantApp = () => {
   const [loading, setLoading] = useState(false);
@@ -9,21 +11,28 @@ export const MerchantApp = () => {
   const handlePurchase = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/add-mock-transaction', {
+      const uid = getUserId();
+      if (!uid) {
+        alert("Please login first to place an order.");
+        return;
+      }
+      
+      const data = await apiFetch(`/transaction/${uid}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           merchant: "SWIGGY",
-          amount: 450.0
+          amount: 450.0,
+          category: "Food",
+          type: "debit"
         })
       });
-      const data = await response.json();
-      if (data.status === "success") {
+      
+      if (data) {
         alert("Order Placed! Check your FinPilot Dashboard for real-time insights.");
       }
     } catch (error) {
       console.error("Failed to place order:", error);
-      alert("Backend not running? Make sure FastAPI is on port 8000.");
+      alert("Failed to connect to backend. Please check your setup.");
     } finally {
       setLoading(false);
     }

@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-import { type ThemeProviderProps } from "next-themes/dist/types";
-
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+// ThemeProvider is a no-op wrapper — this app is locked to light mode.
+// next-themes is intentionally bypassed to prevent the "script tag" hydration warning
+// it injects a color-scheme detection script that React warns about in client components.
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }
