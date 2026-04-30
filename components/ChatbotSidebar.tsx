@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MessageSquare, X, Send, Bot, Loader2 } from "lucide-react";
+import { MessageSquare, X, Send, Bot, Loader2, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import { useDashboard } from "@/lib/DashboardContext";
@@ -16,6 +16,7 @@ export default function ChatbotSidebar() {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -39,6 +40,19 @@ export default function ChatbotSidebar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isChatOpen, setIsChatOpen]);
 
+  // Cleanup abort controller on unmount
+  useEffect(() => {
+    return () => { abortControllerRef.current?.abort(); };
+  }, []);
+
+  const handleStop = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsTyping(false);
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || isTyping) return;
@@ -59,22 +73,36 @@ export default function ChatbotSidebar() {
     setInputValue("");
     setIsTyping(true);
 
+    // Create a new AbortController for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       const data = await apiFetch(`/chat/${uid}/${sessionId}`, {
         method: "POST",
         body: JSON.stringify({ message: userMsg }),
+        signal: controller.signal,
       });
       setChatMessages([
         ...newMessages,
         { role: "bot", content: data.response ?? "I didn't get that. Try rephrasing." },
       ]);
     } catch (err: any) {
-      toast.error("Chat failed — check your connection");
-      setChatMessages([
-        ...newMessages,
-        { role: "bot", content: "Something went wrong. Please try again." },
-      ]);
+      if (err?.name === "AbortError") {
+        // User stopped the request
+        setChatMessages([
+          ...newMessages,
+          { role: "bot", content: "Response stopped." },
+        ]);
+      } else {
+        toast.error("Chat failed — check your connection");
+        setChatMessages([
+          ...newMessages,
+          { role: "bot", content: "Something went wrong. Please try again." },
+        ]);
+      }
     } finally {
+      abortControllerRef.current = null;
       setIsTyping(false);
     }
   };
@@ -101,7 +129,10 @@ export default function ChatbotSidebar() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className={cn(
+              "w-2 h-2 rounded-full",
+              isTyping ? "bg-amber-400 animate-pulse" : "bg-emerald-400 animate-pulse"
+            )} />
             <button
               onClick={() => setIsChatOpen(false)}
               className="hover:rotate-90 transition-transform p-1 text-muted-foreground hover:text-foreground"
@@ -136,11 +167,17 @@ export default function ChatbotSidebar() {
             </div>
           ))}
           {isTyping && (
-            <div className="flex items-start gap-2 animate-in fade-in">
-              <div className="bg-secondary p-4 rounded-2xl flex items-center gap-2">
+            <div className="flex flex-col gap-2 items-start animate-in fade-in slide-in-from-bottom-2">
+              <div className="bg-secondary p-4 rounded-2xl flex items-center gap-3">
                 <Loader2 size={14} className="animate-spin text-muted-foreground" />
-                <span className="text-xs text-muted-foreground font-medium">Thinking…</span>
+                <span className="text-xs text-muted-foreground font-medium">Thinking</span>
+                <span className="flex gap-0.5">
+                  <span className="w-1 h-1 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1 h-1 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1 h-1 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                </span>
               </div>
+              <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest px-1">FinPilot</span>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -152,17 +189,28 @@ export default function ChatbotSidebar() {
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask about your spending…"
+            placeholder={isTyping ? "Waiting for response…" : "Ask about your spending…"}
             disabled={isTyping}
             className="flex-grow bg-white border border-border px-4 py-3 text-xs font-medium rounded-full focus:outline-none focus:ring-1 focus:ring-foreground transition-all disabled:opacity-50"
           />
-          <button
-            type="submit"
-            disabled={isTyping || !inputValue.trim()}
-            className="bg-foreground text-background p-3 rounded-full hover:opacity-90 transition-all shadow-md active:scale-95 disabled:opacity-40"
-          >
-            <Send size={16} />
-          </button>
+          {isTyping ? (
+            <button
+              type="button"
+              onClick={handleStop}
+              className="bg-red-500 text-white p-3 rounded-full hover:bg-red-600 transition-all shadow-md active:scale-95"
+              title="Stop response"
+            >
+              <Square size={14} fill="currentColor" />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!inputValue.trim()}
+              className="bg-foreground text-background p-3 rounded-full hover:opacity-90 transition-all shadow-md active:scale-95 disabled:opacity-40"
+            >
+              <Send size={16} />
+            </button>
+          )}
         </form>
       </div>
 

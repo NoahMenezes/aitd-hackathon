@@ -35,7 +35,7 @@ async def chat_with_bot(user_id: str, session_id: str, req: ChatRequest):
         
         # Simple rule-based logic for the demo chatbot to feel "real" and connected to data
         if "spend" in msg or "expense" in msg or "how much" in msg:
-            response = f"Your total expenses for this period are ₹{summary['total_expenses']:,.2f}. "
+            response = f"Your total expenses for this period are ₹{summary['total_debit']:,.2f}. "
             if insights_data["category_totals"]:
                 top_cat = max(insights_data["category_totals"], key=insights_data["category_totals"].get)
                 response += f"Your highest spending category is {top_cat} at ₹{insights_data['category_totals'][top_cat]:,.2f}."
@@ -56,7 +56,7 @@ async def chat_with_bot(user_id: str, session_id: str, req: ChatRequest):
             else:
                 response = "I don't have enough merchant data to give you a detailed list yet."
                 
-        elif "insight" in msg or "advice" in msg or "recommend" in msg:
+        elif "insight" in msg or "advice" in msg or "recommend" in msg or "why" in msg:
             if all_insights:
                 response = f"Here's what I detected: {all_insights[0]}. "
                 if len(insights_data["recommendations"]) > 0:

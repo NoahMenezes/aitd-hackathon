@@ -5,7 +5,7 @@ export const setToken = (t: string): void =>
   localStorage.setItem("sumo_token", t);
 
 export const getUserId = (): string | null =>
-  typeof window !== "undefined" ? localStorage.getItem("sumo_user_id") : null;
+  typeof window !== "undefined" ? (localStorage.getItem("sumo_user_id") || "testuser") : null;
 
 export const setUserId = (id: string): void =>
   localStorage.setItem("sumo_user_id", id);

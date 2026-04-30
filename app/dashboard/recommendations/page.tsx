@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { toast } from "react-hot-toast";
-import { getUserId } from "@/lib/auth";
+import { getUserId, getChatSessionId } from "@/lib/auth";
 
 interface Rec { title: string; description: string; category?: string; action?: string; savings_monthly?: number; }
 
@@ -16,7 +16,7 @@ const EASY_STEPS = ["Reduce food orders by 2/week", "Cancel 1 unused subscriptio
 const FEASIBILITY = "High chance you'll follow this";
 
 export default function RecommendationsPage() {
-  const { setIsChatOpen, setChatMessages, setSelectedPlan, selectedPlan } = useDashboard();
+  const { isChatOpen, setIsChatOpen, chatMessages, setChatMessages, setSelectedPlan, selectedPlan } = useDashboard();
   const router = useRouter();
 
   const [recs, setRecs]             = useState<Rec[]>([]);
@@ -50,12 +50,36 @@ export default function RecommendationsPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const handleAskAI = (rec: Rec) => {
+  const handleAskAI = async (rec: Rec) => {
     setIsChatOpen(true);
-    setChatMessages([
-      { role: "user", content: `Why is "${rec.title}" recommended for me?` },
-      { role: "bot",  content: rec.description || "Based on your spending patterns, this change could save you money significantly." },
-    ]);
+    const userMsg = `Why is "${rec.title}" recommended for me?`;
+    
+    const newMessages: { role: "user" | "bot", content: string }[] = [
+      ...chatMessages,
+      { role: "user", content: userMsg },
+    ];
+    setChatMessages(newMessages);
+
+    const uid = getUserId();
+    const sessionId = getChatSessionId();
+    if (!uid) return;
+
+    try {
+      const data = await apiFetch(`/chat/${uid}/${sessionId}`, {
+        method: "POST",
+        body: JSON.stringify({ message: userMsg }),
+      });
+      setChatMessages([
+        ...newMessages,
+        { role: "bot", content: data.response ?? "I didn't get that. Try rephrasing." },
+      ]);
+    } catch (err: any) {
+      toast.error("Chat failed");
+      setChatMessages([
+        ...newMessages,
+        { role: "bot", content: "Something went wrong. Please try again." },
+      ]);
+    }
   };
 
   const handleStartPlan = () => {

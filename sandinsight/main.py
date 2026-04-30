@@ -24,6 +24,7 @@ from routes.chat import router as chat_router
 from routes.dashboard import router as dashboard_router
 from routes.insights import router as insights_router
 from routes.recommendations import router as recommendations_router
+from routes.simulation import router as simulation_router
 
 # ──────────────────────────────────────────────
 # Logging configuration
@@ -72,6 +73,7 @@ app.include_router(chat_router)
 app.include_router(dashboard_router)
 app.include_router(insights_router)
 app.include_router(recommendations_router)
+app.include_router(simulation_router)
 
 # ──────────────────────────────────────────────
 # WebSocket — real-time insights feed
