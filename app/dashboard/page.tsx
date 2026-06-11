@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import { apiFetch } from "@/lib/api";
+import { dashboardApi, insightsApi, adminApi } from "@/lib/sumo-api";
+
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import { getUserId } from "@/lib/auth";
@@ -84,9 +86,14 @@ export default function DashboardPage() {
   const [yearlySpent, setYearlySpent] = useState(0);
   const [monthlySpent, setMonthlySpent] = useState(0);
   const [weeklySpent, setWeeklySpent] = useState(0);
-  const [topCategory, setTopCategory] = useState({ name: "Food & Dining", amount: 0 });
+  const [topCategory, setTopCategory] = useState({
+    name: "Food & Dining",
+    amount: 0,
+  });
   const [showCalendar, setShowCalendar] = useState(false);
-  const [dailySpendData, setDailySpendData] = useState<{ date: string; amount: number; top_category: string }[]>([]);
+  const [dailySpendData, setDailySpendData] = useState<
+    { date: string; amount: number; top_category: string }[]
+  >([]);
   const [calendarLoading, setCalendarLoading] = useState(false);
 
   // ── Fetch real data from SandInsight ─────────────────────────────────────
@@ -99,19 +106,23 @@ export default function DashboardPage() {
         return;
       }
 
-      const [summaryRes, trendRes, alertsRes, breakdownRes] = await Promise.all([
-        apiFetch(`/dashboard/summary/${uid}`),
-        apiFetch(`/dashboard/spending-trend/${uid}?view=monthly`),
-        apiFetch(`/dashboard/alerts/${uid}`),
-        apiFetch(`/insights/category-breakdown/${uid}?period=2026-04`),
-      ]);
+      const [summaryRes, trendRes, alertsRes, breakdownRes] = await Promise.all(
+        [
+          dashboardApi.getSummary(uid),
+          dashboardApi.getSpendingTrend("monthly", uid),
+          dashboardApi.getAlerts(uid),
+          insightsApi.getCategoryBreakdown("2026-04", uid),
+        ],
+      );
 
       let highestCategoryName = "Food & Dining";
       let highestCategoryAmount = 0;
 
       if (breakdownRes?.categories && breakdownRes.categories.length > 0) {
         // Find highest spending category
-        const sorted = [...breakdownRes.categories].sort((a, b) => b.amount - a.amount);
+        const sorted = [...breakdownRes.categories].sort(
+          (a, b) => b.amount - a.amount,
+        );
         highestCategoryName = sorted[0].name;
         highestCategoryAmount = sorted[0].amount;
       }
@@ -124,7 +135,10 @@ export default function DashboardPage() {
         setMonthlySpent(summaryRes.spending?.month?.total_spent ?? 0);
         setWeeklySpent(summaryRes.spending?.week?.total_spent ?? 0);
 
-        setTopCategory({ name: highestCategoryName, amount: highestCategoryAmount });
+        setTopCategory({
+          name: highestCategoryName,
+          amount: highestCategoryAmount,
+        });
 
         setIncome({
           stability_score: summaryRes.user?.stability_score ?? 88,
@@ -176,19 +190,27 @@ export default function DashboardPage() {
         );
       }
     } catch (err: any) {
-      toast.error("Failed to load data: " + err.message);
+      if (err.message?.includes("404") || err.message?.includes("User not found")) {
+        console.warn("User not found on backend. Resetting linked state.");
+        setIsLinked(false);
+        toast.error("User profile not found. Please link your account again to sync data.");
+      } else {
+        toast.error("Failed to load data: " + err.message);
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setIsLinked]);
+
 
   const fetchDailyList = async () => {
     setCalendarLoading(true);
     try {
       const uid = getUserId();
       if (!uid) return;
+      // Note: /dashboard/daily-list is not in the official list but seems used here. 
+      // I'll keep it as apiFetch or move to sumo-api if needed.
       const res = await apiFetch(`/dashboard/daily-list/${uid}`);
-      console.log("Daily List Response:", res);
       if (res?.status === "error") {
         toast.error(res.message || "Failed to load data");
       } else if (res?.days) {
@@ -222,15 +244,15 @@ export default function DashboardPage() {
     try {
       const uid = getUserId();
       if (!uid) throw new Error("User not logged in");
-      
+
       // We use the seed API to simulate fetching full history from the aggregator
-      await apiFetch(`/seed/${uid}`, { method: "POST" });
-      
+      await adminApi.seed(uid);
+
       setAaStep("done");
       setAaStatus("Account linked! Loading your insights…");
       setIsLinked(true);
       toast.success("Account linked successfully! 🎉");
-      
+
       // Refresh dashboard data
       fetchData();
     } catch (err: any) {
@@ -239,6 +261,7 @@ export default function DashboardPage() {
       toast.error("Linking failed: " + err.message);
     }
   };
+
 
   // ── Aggregate metrics ─────────────────────────────────────────────────────
   // Computed vars removed
@@ -431,7 +454,8 @@ export default function DashboardPage() {
                         "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
                         bg,
                         color,
-                        onClick && "cursor-pointer hover:scale-110 active:scale-95"
+                        onClick &&
+                          "cursor-pointer hover:scale-110 active:scale-95",
                       )}
                     >
                       <Icon size={16} />
@@ -473,7 +497,9 @@ export default function DashboardPage() {
                   Category: {topCategory.name.toUpperCase()}
                 </h3>
                 <p className="text-sm font-medium text-slate-600 leading-relaxed mb-6">
-                  Your {topCategory.name.toLowerCase()} spending is the highest this month, currently at ₹{topCategory.amount.toLocaleString("en-IN")}.
+                  Your {topCategory.name.toLowerCase()} spending is the highest
+                  this month, currently at ₹
+                  {topCategory.amount.toLocaleString("en-IN")}.
                 </p>
               </div>
               <Link href="/dashboard/recommendations">
@@ -495,10 +521,14 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <p className="text-lg font-bold text-slate-800 leading-relaxed mt-4 mb-6">
-                  At this rate, you will spend ₹{(topCategory.amount * 12).toLocaleString("en-IN")} per year on {topCategory.name.toLowerCase()} alone.
+                  At this rate, you will spend ₹
+                  {(topCategory.amount * 12).toLocaleString("en-IN")} per year
+                  on {topCategory.name.toLowerCase()} alone.
                 </p>
               </div>
-              <Link href={`/dashboard/simulation?category=${encodeURIComponent(topCategory.name)}`}>
+              <Link
+                href={`/dashboard/simulation?category=${encodeURIComponent(topCategory.name)}`}
+              >
                 <button className="bg-black text-white px-6 py-3 rounded-sm font-black text-[10px] uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all w-full flex items-center justify-center gap-2">
                   Redirect to Simulation <ArrowRightLeft size={12} />
                 </button>
@@ -506,7 +536,6 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
-
 
         {/* Active Plan Strip */}
         {selectedPlan && (
@@ -553,26 +582,32 @@ export default function DashboardPage() {
                     </div>
                   ))}
                 </div>
-                
+
                 {/* Progress Bar */}
                 <div className="mt-2">
                   <div className="flex justify-between items-center mb-1.5">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Current Progress</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      Current Progress
+                    </p>
                     <p className="text-[10px] font-black text-emerald-600">
                       {(() => {
-                        const start = new Date(selectedPlan.startedAt).getTime();
+                        const start = new Date(
+                          selectedPlan.startedAt,
+                        ).getTime();
                         const now = new Date().getTime();
-                        const diffDays = Math.floor((now - start) / (1000 * 60 * 60 * 24));
-                        const prog = Math.min(90, 5 + (diffDays * 1));
+                        const diffDays = Math.floor(
+                          (now - start) / (1000 * 60 * 60 * 24),
+                        );
+                        const prog = Math.min(90, 5 + diffDays * 1);
                         return `${prog}%`;
                       })()}
                     </p>
                   </div>
                   <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(16,185,129,0.3)]"
-                      style={{ 
-                        width: `${Math.min(90, 5 + (Math.floor((new Date().getTime() - new Date(selectedPlan.startedAt).getTime()) / (1000 * 60 * 60 * 24)) * 1))}%` 
+                      style={{
+                        width: `${Math.min(90, 5 + Math.floor((new Date().getTime() - new Date(selectedPlan.startedAt).getTime()) / (1000 * 60 * 60 * 24)) * 1)}%`,
                       }}
                     />
                   </div>
@@ -603,10 +638,14 @@ export default function DashboardPage() {
           <div className="bg-white rounded-3xl shadow-2xl border border-border w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-8 border-b border-border flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Activity Heatmap</p>
-                <h3 className="text-2xl font-black text-black tracking-tight">Spending Calendar</h3>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                  Activity Heatmap
+                </p>
+                <h3 className="text-2xl font-black text-black tracking-tight">
+                  Spending Calendar
+                </h3>
               </div>
-              <button 
+              <button
                 onClick={() => setShowCalendar(false)}
                 className="w-10 h-10 rounded-full hover:bg-slate-50 flex items-center justify-center text-slate-400 hover:text-black transition-all"
               >
@@ -618,7 +657,9 @@ export default function DashboardPage() {
               {calendarLoading ? (
                 <div className="h-[400px] flex flex-col items-center justify-center gap-4 text-slate-300">
                   <Loader2 size={32} className="animate-spin" />
-                  <p className="text-xs font-black uppercase tracking-widest">Crunching daily records…</p>
+                  <p className="text-xs font-black uppercase tracking-widest">
+                    Crunching daily records…
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-8">
@@ -627,23 +668,32 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-sm bg-slate-50 border border-slate-100" />
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">None</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">
+                          None
+                        </span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-2.5 h-2.5 rounded-sm bg-violet-600/60" />
-                        <span className="text-[9px] font-bold text-slate-400 uppercase">High</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">
+                          High
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   <TooltipProvider>
                     <div className="grid grid-cols-7 gap-2">
-                      {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(d => (
-                        <div key={d} className="text-center text-[10px] font-black text-slate-300 uppercase py-2">
-                          {d}
-                        </div>
-                      ))}
-                      
+                      {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
+                        (d) => (
+                          <div
+                            key={d}
+                            className="text-center text-[10px] font-black text-slate-300 uppercase py-2"
+                          >
+                            {d}
+                          </div>
+                        ),
+                      )}
+
                       {/* Empty padding for April 2026 (Starts on Wed) */}
                       <div className="aspect-square" />
                       <div className="aspect-square" />
@@ -652,7 +702,7 @@ export default function DashboardPage() {
                         const dateObj = new Date(day.date);
                         const dayNum = dateObj.getDate();
                         const amount = day.amount;
-                        
+
                         // Determine opacity based on amount (normalized roughly)
                         let opacity = 0.05;
                         if (amount > 5000) opacity = 0.9;
@@ -663,11 +713,19 @@ export default function DashboardPage() {
                         return (
                           <Tooltip key={day.date}>
                             <TooltipTrigger asChild>
-                              <div 
+                              <div
                                 className="aspect-square rounded-lg flex items-center justify-center text-[11px] font-black transition-all hover:scale-110 cursor-pointer border border-slate-100"
-                                style={{ 
-                                  backgroundColor: amount > 0 ? `rgba(124, 58, 237, ${opacity})` : 'transparent',
-                                  color: amount > 0 ? (opacity > 0.5 ? 'white' : 'rgb(124, 58, 237)') : '#cbd5e1'
+                                style={{
+                                  backgroundColor:
+                                    amount > 0
+                                      ? `rgba(124, 58, 237, ${opacity})`
+                                      : "transparent",
+                                  color:
+                                    amount > 0
+                                      ? opacity > 0.5
+                                        ? "white"
+                                        : "rgb(124, 58, 237)"
+                                      : "#cbd5e1",
                                 }}
                               >
                                 {dayNum}
@@ -676,9 +734,15 @@ export default function DashboardPage() {
                             <TooltipContent className="bg-black text-white border-none p-3 rounded-xl shadow-2xl">
                               <div className="space-y-1">
                                 <p className="text-[10px] font-black uppercase tracking-widest opacity-50">
-                                  {dateObj.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'short' })}
+                                  {dateObj.toLocaleDateString("en-IN", {
+                                    weekday: "long",
+                                    day: "numeric",
+                                    month: "short",
+                                  })}
                                 </p>
-                                <p className="text-sm font-black">₹{amount.toLocaleString('en-IN')}</p>
+                                <p className="text-sm font-black">
+                                  ₹{amount.toLocaleString("en-IN")}
+                                </p>
                                 {day.top_category && (
                                   <p className="text-[9px] font-bold text-violet-400 uppercase tracking-wider bg-violet-400/10 px-1.5 py-0.5 rounded-sm w-fit">
                                     {day.top_category}

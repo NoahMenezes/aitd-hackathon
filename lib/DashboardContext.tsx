@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiFetch } from './api';
 import { getUserId } from './auth';
+import { dashboardApi, transactionsApi } from './sumo-api';
 
 interface Transaction {
   type: string;
@@ -43,14 +44,22 @@ interface DashboardContextType {
   setChatMessages: (val: { role: "user" | "bot"; content: string }[]) => void;
   selectedPlan: SelectedPlan | null;
   setSelectedPlan: (plan: SelectedPlan | null) => void;
+  refreshData: () => Promise<void>;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
-  // Always start as false (matches server render), then sync from sessionStorage after mount
   const [isLinked, setIsLinkedState] = useState<boolean>(false);
   const [checkingLink, setCheckingLink] = useState(true);
+  const [balance, setBalance] = useState(0);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [foodSpend, setFoodSpend] = useState(0);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "bot"; content: string }[]>([]);
+  const [selectedPlan, setSelectedPlanState] = useState<SelectedPlan | null>(null);
+
+  const uid = getUserId();
 
   useEffect(() => {
     const stored = sessionStorage.getItem("finpilot_linked");
@@ -58,16 +67,42 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     setCheckingLink(false);
   }, []);
 
+  const refreshData = async () => {
+    if (!uid) return;
+    try {
+      const summary = await dashboardApi.getSummary(uid);
+      if (summary) {
+        setBalance(summary.balance || summary.current_balance || 0);
+        // Assuming food spend comes from somewhere or we calculate it
+      }
+
+      const txns = await transactionsApi.list({ limit: 20 }, uid);
+      if (Array.isArray(txns)) {
+        setTransactions(txns.map((t: any) => ({
+          type: t.type?.toUpperCase() || "DEBIT",
+          mode: t.mode || "UPI",
+          amount: t.amount,
+          currentBalance: t.current_balance || 0,
+          transactionTimestamp: t.timestamp || t.transactionTimestamp || new Date().toISOString(),
+          narration: t.merchant || t.narration || "Transaction",
+          reference: t.id || t.reference || Math.random().toString(36).slice(2),
+        })));
+      }
+    } catch (err) {
+      console.error("Failed to fetch dashboard data:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (uid) {
+      refreshData();
+    }
+  }, [uid]);
+
   const setIsLinked = (val: boolean) => {
     setIsLinkedState(val);
     sessionStorage.setItem("finpilot_linked", String(val));
   };
-  const [balance, setBalance] = useState(52450);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [foodSpend, setFoodSpend] = useState(7500);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<{ role: "user" | "bot"; content: string }[]>([]);
-  const [selectedPlan, setSelectedPlanState] = useState<SelectedPlan | null>(null);
 
   useEffect(() => {
     const plan = localStorage.getItem("finpilot_plan");
@@ -89,33 +124,17 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
   const handlePurchase = async (merchant: string, amount: number, category: string) => {
     try {
-      const uid = getUserId();
       if (!uid) throw new Error("No user ID");
 
-      await apiFetch(`/transaction/${uid}`, {
-        method: "POST",
-        body: JSON.stringify({
-          merchant,
-          amount,
-          category,
-          type: "debit"
-        })
-      });
+      await transactionsApi.record({
+        merchant,
+        amount,
+        category,
+        type: "debit"
+      }, uid);
 
-      // Optimistically update local state
-      const newBalance = balance - amount;
-      const newTxn = {
-        type: "DEBIT",
-        mode: "UPI",
-        amount: amount,
-        currentBalance: newBalance,
-        transactionTimestamp: new Date().toISOString(),
-        narration: `UPI/${merchant.toUpperCase()}/TXN${Math.floor(Math.random() * 100000)}`,
-        reference: Math.floor(Math.random() * 10000000000).toString(),
-      };
-
-      setBalance(newBalance);
-      setTransactions((prev) => [newTxn, ...prev]);
+      // Refresh data after purchase to get updated balance and txns
+      await refreshData();
 
       if (category === "Food") {
         setFoodSpend(prev => prev + amount);
@@ -135,11 +154,13 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       isChatOpen, setIsChatOpen,
       chatMessages, setChatMessages,
       selectedPlan, setSelectedPlan,
+      refreshData,
     }}>
       {children}
     </DashboardContext.Provider>
   );
 };
+
 
 export const useDashboard = () => {
   const context = useContext(DashboardContext);

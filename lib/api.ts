@@ -1,16 +1,17 @@
 import { clearAuth, getToken } from "./auth";
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+// Use ngrok URL from environment, fallback to localhost for development
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8001";
 
 export async function apiFetch(
   path: string,
   options: RequestInit = {},
-  token?: string
+  token?: string,
 ) {
   const authToken = token ?? getToken() ?? undefined;
   const headers: HeadersInit = {
     "Content-Type": "application/json",
-    "ngrok-skip-browser-warning": "true",
+    "ngrok-skip-browser-warning": "true", // skip ngrok warning page
     ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
     ...(options.headers || {}),
   };

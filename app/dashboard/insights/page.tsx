@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Zap, TrendingUp, BarChart3, Loader2, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { BorderBeam } from "@/components/magicui/border-beam";
-import { apiFetch } from "@/lib/api";
+import { insightsApi, dashboardApi } from "@/lib/sumo-api";
 import { toast } from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import { getUserId } from "@/lib/auth";
@@ -38,9 +38,9 @@ export default function InsightsPage() {
       }
 
       const [breakdownRes, obsRes, summaryRes] = await Promise.all([
-        apiFetch(`/insights/category-breakdown/${uid}`),
-        apiFetch(`/insights/ai-observations/${uid}`),
-        apiFetch(`/dashboard/summary/${uid}`),
+        insightsApi.getCategoryBreakdown(undefined, uid),
+        insightsApi.getAiObservations(uid),
+        dashboardApi.getSummary(uid),
       ]);
 
       if (breakdownRes?.categories) {
@@ -79,6 +79,7 @@ export default function InsightsPage() {
       setLoading(false);
     }
   }, [timeframe]);
+
 
   useEffect(() => { fetchData(); }, [fetchData]);
 

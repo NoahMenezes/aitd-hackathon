@@ -6,7 +6,7 @@ import { Zap, TrendingUp, TrendingDown, ChevronRight, CheckCircle2, Sparkles, Lo
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import { useDashboard, type SelectedPlan, type PlanKey } from "@/lib/DashboardContext";
-import { apiFetch } from "@/lib/api";
+import { simulationApi, insightsApi } from "@/lib/sumo-api";
 import { toast } from "react-hot-toast";
 import { getUserId } from "@/lib/auth";
 
@@ -44,7 +44,7 @@ function SimulationContent() {
         setLoading(false);
         return;
       }
-      const res = await apiFetch(`/insights/category-breakdown/${uid}`);
+      const res = await insightsApi.getCategoryBreakdown(undefined, uid);
       const totals: Record<string, number> = {};
       (res?.categories || []).forEach((c: any) => { totals[c.name] = c.amount; });
       setCatTotals(totals);
@@ -76,14 +76,11 @@ function SimulationContent() {
 
       // Only hit the API if simulating a specific category
       if (categoryParam) {
-        const res = await apiFetch(`/simulation/run/${uid}`, {
-          method: "POST",
-          body: JSON.stringify({
-            category: categoryParam,
-            target_reduction: def.cutPct,
-            time_horizon_months: 12
-          })
-        });
+        const res = await simulationApi.run({
+          category: categoryParam,
+          target_reduction: def.cutPct,
+          time_horizon_months: 12
+        }, uid);
         if (res.total_projected_savings) {
           yearlySave = res.total_projected_savings;
         }
@@ -102,6 +99,7 @@ function SimulationContent() {
       setSimLoading(false);
     }
   };
+
 
   return (
     <main className="h-screen flex flex-col pt-24 px-6 pb-10 overflow-hidden font-body bg-transparent">

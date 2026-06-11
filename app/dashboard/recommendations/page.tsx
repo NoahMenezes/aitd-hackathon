@@ -6,7 +6,7 @@ import { useDashboard, type SelectedPlan } from "@/lib/DashboardContext";
 import { BorderBeam } from "@/components/magicui/border-beam";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "@/lib/api";
+import { recommendationsApi, chatApi } from "@/lib/sumo-api";
 import { toast } from "react-hot-toast";
 import { getUserId, getChatSessionId } from "@/lib/auth";
 
@@ -31,7 +31,7 @@ export default function RecommendationsPage() {
         setLoading(false);
         return;
       }
-      const res = await apiFetch(`/recommendations/list/${uid}`);
+      const res = await recommendationsApi.getList("moderate", uid);
       const raw: any[] = res?.recommendations ?? [];
       const mapped: Rec[] = raw.map((r: any) => ({
         title: r.title,
@@ -65,10 +65,7 @@ export default function RecommendationsPage() {
     if (!uid) return;
 
     try {
-      const data = await apiFetch(`/chat/${uid}/${sessionId}`, {
-        method: "POST",
-        body: JSON.stringify({ message: userMsg }),
-      });
+      const data = await chatApi.sendMessage(userMsg, sessionId, uid);
       setChatMessages([
         ...newMessages,
         { role: "bot", content: data.response ?? "I didn't get that. Try rephrasing." },
@@ -81,6 +78,7 @@ export default function RecommendationsPage() {
       ]);
     }
   };
+
 
   const handleStartPlan = () => {
     const plan: SelectedPlan = {
